@@ -27,7 +27,7 @@ package net.fabricmc.loom.test.unit
 import spock.lang.Specification
 
 import net.fabricmc.loom.configuration.providers.BundleMetadata
-import net.fabricmc.loom.configuration.providers.minecraft.MinecraftJarSplitter
+import net.fabricmc.loom.configuration.providers.cosmicreach.CosmicReachJarSplitter
 import net.fabricmc.loom.test.LoomTestConstants
 import net.fabricmc.loom.test.util.GradleTestUtil
 import net.fabricmc.loom.util.download.Download
@@ -53,7 +53,7 @@ class MinecraftJarSplitterTest extends Specification {
 		clientOnlyJar.delete()
 		commonJar.delete()
 
-		new MinecraftJarSplitter(clientJar.toPath(), serverJar.toPath()).withCloseable {
+		new CosmicReachJarSplitter(clientJar.toPath(), serverJar.toPath()).withCloseable {
 			it.split(clientOnlyJar.toPath(), commonJar.toPath())
 		}
 		then:

@@ -39,7 +39,7 @@ import org.gradle.api.logging.Logger;
 
 import net.fabricmc.loom.LoomGradleExtension;
 import net.fabricmc.loom.api.mappings.layered.MappingContext;
-import net.fabricmc.loom.configuration.providers.minecraft.MinecraftProvider;
+import net.fabricmc.loom.configuration.providers.cosmicreach.CosmicReachProvider;
 import net.fabricmc.loom.util.download.DownloadBuilder;
 import net.fabricmc.loom.util.service.ScopedServiceFactory;
 import net.fabricmc.mappingio.tree.MemoryMappingTree;
@@ -86,8 +86,8 @@ public class GradleMappingContext implements MappingContext {
 	}
 
 	@Override
-	public MinecraftProvider minecraftProvider() {
-		return extension.getMinecraftProvider();
+	public CosmicReachProvider minecraftProvider() {
+		return extension.getCosmicReachProvider();
 	}
 
 	@Override

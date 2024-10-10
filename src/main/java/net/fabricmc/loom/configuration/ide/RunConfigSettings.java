@@ -43,7 +43,7 @@ import org.gradle.api.tasks.SourceSet;
 import org.jetbrains.annotations.ApiStatus;
 
 import net.fabricmc.loom.LoomGradleExtension;
-import net.fabricmc.loom.configuration.providers.minecraft.MinecraftSourceSets;
+import net.fabricmc.loom.configuration.providers.cosmicreach.CosmicReachSourceSets;
 import net.fabricmc.loom.util.Constants;
 import net.fabricmc.loom.util.Platform;
 import net.fabricmc.loom.util.gradle.SourceSetHelper;
@@ -148,7 +148,7 @@ public class RunConfigSettings implements Named {
 		this.devLaunchMainClass = project.getObjects().property(String.class).convention("net.fabricmc.devlaunchinjector.Main");
 
 		setSource(p -> {
-			final String sourceSetName = MinecraftSourceSets.get(p).getSourceSetForEnv(getEnvironment());
+			final String sourceSetName = CosmicReachSourceSets.get(p).getSourceSetForEnv(getEnvironment());
 			return SourceSetHelper.getSourceSetByName(sourceSetName, p);
 		});
 

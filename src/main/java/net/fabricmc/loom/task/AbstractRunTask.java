@@ -81,7 +81,7 @@ public abstract class AbstractRunTask extends JavaExec {
 
 	public AbstractRunTask(Function<Project, RunConfig> configProvider) {
 		super();
-		setGroup(Constants.TaskGroup.FABRIC);
+		setGroup(Constants.TaskGroup.PUZZLE);
 
 		final Provider<RunConfig> config = getProject().provider(() -> configProvider.apply(getProject()));
 

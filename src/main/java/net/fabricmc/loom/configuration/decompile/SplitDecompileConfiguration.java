@@ -32,26 +32,26 @@ import org.gradle.api.Task;
 import org.gradle.api.tasks.TaskProvider;
 
 import net.fabricmc.loom.api.decompilers.DecompilerOptions;
-import net.fabricmc.loom.configuration.providers.minecraft.MinecraftJar;
-import net.fabricmc.loom.configuration.providers.minecraft.mapped.MappedMinecraftProvider;
+import net.fabricmc.loom.configuration.providers.cosmicreach.CosmicReachJar;
+import net.fabricmc.loom.configuration.providers.cosmicreach.mapped.MappedCosmicReachProvider;
 import net.fabricmc.loom.task.GenerateSourcesTask;
 import net.fabricmc.loom.util.Constants;
 import net.fabricmc.loom.util.Strings;
 
-public final class SplitDecompileConfiguration extends DecompileConfiguration<MappedMinecraftProvider.Split> {
-	public SplitDecompileConfiguration(Project project, MappedMinecraftProvider.Split minecraftProvider) {
+public final class SplitDecompileConfiguration extends DecompileConfiguration<MappedCosmicReachProvider.Split> {
+	public SplitDecompileConfiguration(Project project, MappedCosmicReachProvider.Split minecraftProvider) {
 		super(project, minecraftProvider);
 	}
 
 	@Override
-	public String getTaskName(MinecraftJar.Type type) {
+	public String getTaskName(CosmicReachJar.Type type) {
 		return "gen%sSources".formatted(Strings.capitalize(type.toString()));
 	}
 
 	@Override
 	public void afterEvaluation() {
-		final MinecraftJar commonJar = minecraftProvider.getCommonJar();
-		final MinecraftJar clientOnlyJar = minecraftProvider.getClientOnlyJar();
+		final CosmicReachJar commonJar = minecraftProvider.getCommonJar();
+		final CosmicReachJar clientOnlyJar = minecraftProvider.getClientOnlyJar();
 
 		final TaskProvider<Task> commonDecompileTask = createDecompileTasks("Common", task -> {
 			task.getInputJarName().set(commonJar.getName());
@@ -81,7 +81,7 @@ public final class SplitDecompileConfiguration extends DecompileConfiguration<Ma
 
 			project.getTasks().register("genSourcesWith" + decompilerName, task -> {
 				task.setDescription("Decompile minecraft using %s.".formatted(decompilerName));
-				task.setGroup(Constants.TaskGroup.FABRIC);
+				task.setGroup(Constants.TaskGroup.PUZZLE);
 
 				task.dependsOn(project.getTasks().named("gen%sSourcesWith%s".formatted("Common", decompilerName)));
 				task.dependsOn(project.getTasks().named("gen%sSourcesWith%s".formatted("ClientOnly", decompilerName)));
@@ -90,7 +90,7 @@ public final class SplitDecompileConfiguration extends DecompileConfiguration<Ma
 
 		project.getTasks().register("genSources", task -> {
 			task.setDescription("Decompile minecraft using the default decompiler.");
-			task.setGroup(Constants.TaskGroup.FABRIC);
+			task.setGroup(Constants.TaskGroup.PUZZLE);
 
 			task.dependsOn(commonDecompileTask);
 			task.dependsOn(clientOnlyDecompileTask);
@@ -106,13 +106,13 @@ public final class SplitDecompileConfiguration extends DecompileConfiguration<Ma
 				configureAction.execute(task);
 				task.dependsOn(project.getTasks().named("validateAccessWidener"));
 				task.setDescription("Decompile minecraft using %s.".formatted(decompilerName));
-				task.setGroup(Constants.TaskGroup.FABRIC);
+				task.setGroup(Constants.TaskGroup.PUZZLE);
 			});
 		});
 
 		return project.getTasks().register("gen%sSources".formatted(name), task -> {
 			task.setDescription("Decompile minecraft (%s) using the default decompiler.".formatted(name));
-			task.setGroup(Constants.TaskGroup.FABRIC);
+			task.setGroup(Constants.TaskGroup.PUZZLE);
 
 			task.dependsOn(project.getTasks().named("gen%sSourcesWith%s".formatted(name, DecompileConfiguration.DEFAULT_DECOMPILER)));
 		});

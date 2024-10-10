@@ -27,8 +27,8 @@ package net.fabricmc.loom.test.unit.library
 import org.gradle.api.JavaVersion
 import spock.lang.Specification
 
-import net.fabricmc.loom.configuration.providers.minecraft.MinecraftVersionMeta
-import net.fabricmc.loom.configuration.providers.minecraft.library.LibraryContext
+import net.fabricmc.loom.configuration.providers.cosmicreach.CosmicReachVersionMeta
+import net.fabricmc.loom.configuration.providers.cosmicreach.library.LibraryContext
 import net.fabricmc.loom.test.util.MinecraftTestUtils
 import net.fabricmc.loom.util.Platform
 
@@ -131,7 +131,7 @@ class LibraryContextTest extends Specification {
 					}
 				  ]
 				}"""
-		def context = new LibraryContext(MinecraftTestUtils.GSON.fromJson(metaJson, MinecraftVersionMeta.class), JavaVersion.VERSION_17)
+		def context = new LibraryContext(MinecraftTestUtils.GSON.fromJson(metaJson, CosmicReachVersionMeta.class), JavaVersion.VERSION_17)
 
 		then:
 		context.supportsJava19OrLater() == supportsJava19OrLater

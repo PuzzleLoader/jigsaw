@@ -24,9 +24,9 @@
 
 package net.fabricmc.loom.test.unit.library
 
-import net.fabricmc.loom.configuration.providers.minecraft.library.Library
-import net.fabricmc.loom.configuration.providers.minecraft.library.LibraryProcessorManager
-import net.fabricmc.loom.configuration.providers.minecraft.library.processors.RuntimeLog4jLibraryProcessor
+import net.fabricmc.loom.configuration.providers.cosmicreach.library.Library
+import net.fabricmc.loom.configuration.providers.cosmicreach.library.LibraryProcessorManager
+import net.fabricmc.loom.configuration.providers.cosmicreach.library.processors.RuntimeLog4jLibraryProcessor
 import net.fabricmc.loom.test.unit.library.processors.LibraryProcessorTest
 import net.fabricmc.loom.test.util.GradleTestUtil
 import net.fabricmc.loom.test.util.PlatformTestUtils

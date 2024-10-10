@@ -71,7 +71,7 @@ public abstract class LoomFilesBaseImpl implements LoomFiles {
 
 	@Override
 	public File getNativesDirectory(Project project) {
-		return createFile(getRootProjectPersistentCache(), "natives/" + LoomGradleExtension.get(project).getMinecraftProvider().minecraftVersion());
+		return createFile(getRootProjectPersistentCache(), "natives/" + LoomGradleExtension.get(project).getCosmicReachProvider().minecraftVersion());
 	}
 
 	@Override

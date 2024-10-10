@@ -24,9 +24,9 @@
 
 package net.fabricmc.loom.test.unit.library.processors
 
-import net.fabricmc.loom.configuration.providers.minecraft.library.Library
-import net.fabricmc.loom.configuration.providers.minecraft.library.LibraryProcessor
-import net.fabricmc.loom.configuration.providers.minecraft.library.processors.RuntimeLog4jLibraryProcessor
+import net.fabricmc.loom.configuration.providers.cosmicreach.library.Library
+import net.fabricmc.loom.configuration.providers.cosmicreach.library.LibraryProcessor
+import net.fabricmc.loom.configuration.providers.cosmicreach.library.processors.RuntimeLog4jLibraryProcessor
 import net.fabricmc.loom.test.util.PlatformTestUtils
 
 class RuntimeLog4jLibraryProcessorTest extends LibraryProcessorTest {

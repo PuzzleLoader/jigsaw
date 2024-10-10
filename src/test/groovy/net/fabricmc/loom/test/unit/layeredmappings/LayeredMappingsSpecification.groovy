@@ -45,7 +45,7 @@ import net.fabricmc.loom.configuration.providers.mappings.LayeredMappingsProcess
 import net.fabricmc.loom.configuration.providers.mappings.extras.unpick.UnpickLayer
 import net.fabricmc.loom.configuration.providers.mappings.intermediary.IntermediaryMappingLayer
 import net.fabricmc.loom.configuration.providers.mappings.utils.AddConstructorMappingVisitor
-import net.fabricmc.loom.configuration.providers.minecraft.MinecraftProvider
+import net.fabricmc.loom.configuration.providers.cosmicreach.CosmicReachProvider
 import net.fabricmc.loom.test.LoomTestConstants
 import net.fabricmc.loom.test.unit.LoomMocks
 import net.fabricmc.loom.util.download.Download
@@ -58,7 +58,7 @@ import net.fabricmc.mappingio.tree.MemoryMappingTree
 
 abstract class LayeredMappingsSpecification extends Specification implements LayeredMappingsTestConstants {
 	Logger mockLogger = Mock(Logger)
-	MinecraftProvider mockMinecraftProvider = Mock(MinecraftProvider)
+	CosmicReachProvider mockMinecraftProvider = Mock(CosmicReachProvider)
 	String intermediaryUrl
 	MappingContext mappingContext = new TestMappingContext()
 
@@ -166,7 +166,7 @@ abstract class LayeredMappingsSpecification extends Specification implements Lay
 		}
 
 		@Override
-		MinecraftProvider minecraftProvider() {
+		CosmicReachProvider minecraftProvider() {
 			return mockMinecraftProvider
 		}
 

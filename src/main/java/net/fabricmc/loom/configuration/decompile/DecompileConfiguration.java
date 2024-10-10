@@ -32,12 +32,12 @@ import org.gradle.api.artifacts.ConfigurationContainer;
 import net.fabricmc.loom.LoomGradleExtension;
 import net.fabricmc.loom.api.mappings.layered.MappingsNamespace;
 import net.fabricmc.loom.configuration.providers.mappings.MappingConfiguration;
-import net.fabricmc.loom.configuration.providers.minecraft.MinecraftJar;
-import net.fabricmc.loom.configuration.providers.minecraft.mapped.MappedMinecraftProvider;
+import net.fabricmc.loom.configuration.providers.cosmicreach.CosmicReachJar;
+import net.fabricmc.loom.configuration.providers.cosmicreach.mapped.MappedCosmicReachProvider;
 import net.fabricmc.loom.task.GenerateSourcesTask;
 import net.fabricmc.loom.util.Constants;
 
-public abstract class DecompileConfiguration<T extends MappedMinecraftProvider> {
+public abstract class DecompileConfiguration<T extends MappedCosmicReachProvider> {
 	static final String DEFAULT_DECOMPILER = "Vineflower";
 
 	protected final Project project;
@@ -52,7 +52,7 @@ public abstract class DecompileConfiguration<T extends MappedMinecraftProvider> 
 		this.mappingConfiguration = extension.getMappingConfiguration();
 	}
 
-	public abstract String getTaskName(MinecraftJar.Type type);
+	public abstract String getTaskName(CosmicReachJar.Type type);
 
 	public abstract void afterEvaluation();
 
@@ -62,7 +62,7 @@ public abstract class DecompileConfiguration<T extends MappedMinecraftProvider> 
 		task.getUnpickDefinitions().set(mappingConfiguration.getUnpickDefinitionsFile());
 		task.getUnpickOutputJar().set(unpickOutputJar);
 		task.getUnpickConstantJar().setFrom(configurations.getByName(Constants.Configurations.MAPPING_CONSTANTS));
-		task.getUnpickClasspath().setFrom(configurations.getByName(Constants.Configurations.MINECRAFT_COMPILE_LIBRARIES));
+		task.getUnpickClasspath().setFrom(configurations.getByName(Constants.Configurations.COSMICREACH_COMPILE_LIBRARIES));
 		task.getUnpickClasspath().from(configurations.getByName(Constants.Configurations.MOD_COMPILE_CLASSPATH_MAPPED));
 		extension.getMinecraftJars(MappingsNamespace.NAMED).forEach(task.getUnpickClasspath()::from);
 	}

@@ -96,8 +96,8 @@ public class TinyRemapperService extends Service<TinyRemapperService.Options> im
 			final ConfigurationContainer configurations = project.getConfigurations();
 			final boolean legacyMixin = extension.getMixin().getUseLegacyMixinAp().get();
 			final FileCollection classpath = remapJarTask.getClasspath()
-					.minus(configurations.getByName(Constants.Configurations.MINECRAFT_COMPILE_LIBRARIES))
-					.minus(configurations.getByName(Constants.Configurations.MINECRAFT_RUNTIME_LIBRARIES));
+					.minus(configurations.getByName(Constants.Configurations.COSMICREACH_COMPILE_LIBRARIES))
+					.minus(configurations.getByName(Constants.Configurations.COSMICREACH_RUNTIME_LIBRARIES));
 
 			options.getFrom().set(remapJarTask.getSourceNamespace());
 			options.getTo().set(remapJarTask.getTargetNamespace());

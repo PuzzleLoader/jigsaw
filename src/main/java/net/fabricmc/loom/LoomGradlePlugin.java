@@ -50,7 +50,7 @@ import net.fabricmc.loom.util.LibraryLocationLogger;
 
 public class LoomGradlePlugin implements BootstrappedPlugin {
 	public static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-	public static final String LOOM_VERSION = Objects.requireNonNullElse(LoomGradlePlugin.class.getPackage().getImplementationVersion(), "0.0.0+unknown");
+	public static final String JIGSAW_VERSION = Objects.requireNonNullElse(LoomGradlePlugin.class.getPackage().getImplementationVersion(), "0.0.0+unknown");
 
 	/**
 	 * An ordered list of setup job classes.
@@ -76,7 +76,7 @@ public class LoomGradlePlugin implements BootstrappedPlugin {
 	}
 
 	public void apply(Project project) {
-		project.getLogger().lifecycle("Fabric Loom: " + LOOM_VERSION);
+		project.getLogger().lifecycle("Jigsaw: " + JIGSAW_VERSION);
 		LibraryLocationLogger.logLibraryVersions();
 
 		// Apply default plugins

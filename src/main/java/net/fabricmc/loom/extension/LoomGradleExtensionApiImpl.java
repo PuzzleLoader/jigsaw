@@ -66,10 +66,10 @@ import net.fabricmc.loom.configuration.processors.JarProcessor;
 import net.fabricmc.loom.configuration.providers.mappings.LayeredMappingSpec;
 import net.fabricmc.loom.configuration.providers.mappings.LayeredMappingSpecBuilderImpl;
 import net.fabricmc.loom.configuration.providers.mappings.LayeredMappingsFactory;
-import net.fabricmc.loom.configuration.providers.minecraft.ManifestLocations;
-import net.fabricmc.loom.configuration.providers.minecraft.MinecraftJarConfiguration;
-import net.fabricmc.loom.configuration.providers.minecraft.MinecraftMetadataProvider;
-import net.fabricmc.loom.configuration.providers.minecraft.MinecraftSourceSets;
+import net.fabricmc.loom.configuration.providers.cosmicreach.ManifestLocations;
+import net.fabricmc.loom.configuration.providers.cosmicreach.CosmicReachJarConfiguration;
+import net.fabricmc.loom.configuration.providers.cosmicreach.CosmicReachMetadataProvider;
+import net.fabricmc.loom.configuration.providers.cosmicreach.CosmicReachSourceSets;
 import net.fabricmc.loom.task.GenerateSourcesTask;
 import net.fabricmc.loom.util.Constants;
 import net.fabricmc.loom.util.DeprecationHelper;
@@ -96,7 +96,7 @@ public abstract class LoomGradleExtensionApiImpl implements LoomGradleExtensionA
 	protected final Property<IntermediateMappingsProvider> intermediateMappingsProvider;
 	private final Property<Boolean> runtimeOnlyLog4j;
 	private final Property<Boolean> splitModDependencies;
-	private final Property<MinecraftJarConfiguration<?, ?, ?>> minecraftJarConfiguration;
+	private final Property<CosmicReachJarConfiguration<?, ?, ?>> minecraftJarConfiguration;
 	private final Property<Boolean> splitEnvironmentalSourceSet;
 	private final InterfaceInjectionExtensionAPI interfaceInjectionExtension;
 
@@ -153,22 +153,23 @@ public abstract class LoomGradleExtensionApiImpl implements LoomGradleExtensionA
 		this.minecraftJarProcessors.finalizeValueOnRead();
 
 		//noinspection unchecked
-		this.minecraftJarConfiguration = project.getObjects().property((Class<MinecraftJarConfiguration<?, ?, ?>>) (Class<?>) MinecraftJarConfiguration.class)
+		this.minecraftJarConfiguration = project.getObjects().property((Class<CosmicReachJarConfiguration<?, ?, ?>>) (Class<?>) CosmicReachJarConfiguration.class)
 				.convention(project.provider(() -> {
 					final LoomGradleExtension extension = LoomGradleExtension.get(project);
-					final MinecraftMetadataProvider metadataProvider = extension.getMetadataProvider();
+					final CosmicReachMetadataProvider metadataProvider = extension.getMetadataProvider();
 
 					// if no configuration is selected by the user, attempt to select one
 					// based on the mc version and which sides are present for it
 					if (!metadataProvider.getVersionMeta().downloads().containsKey("server")) {
-						return MinecraftJarConfiguration.CLIENT_ONLY;
+						return CosmicReachJarConfiguration.CLIENT_ONLY;
 					} else if (!metadataProvider.getVersionMeta().downloads().containsKey("client")) {
-						return MinecraftJarConfiguration.SERVER_ONLY;
+						return CosmicReachJarConfiguration.SERVER_ONLY;
 					} else if (metadataProvider.getVersionMeta().isVersionOrNewer(Constants.RELEASE_TIME_1_3)) {
-						return MinecraftJarConfiguration.MERGED;
-					} else {
-						return MinecraftJarConfiguration.LEGACY_MERGED;
-					}
+						return CosmicReachJarConfiguration.MERGED;
+					}/* else {
+						return CosmicReachJarConfiguration.LEGACY_MERGED;
+					}*/
+					return CosmicReachJarConfiguration.MERGED;
 				}));
 		this.minecraftJarConfiguration.finalizeValueOnRead();
 
@@ -371,7 +372,7 @@ public abstract class LoomGradleExtensionApiImpl implements LoomGradleExtensionA
 	}
 
 	@Override
-	public Property<MinecraftJarConfiguration<?, ?, ?>> getMinecraftJarConfiguration() {
+	public Property<CosmicReachJarConfiguration<?, ?, ?>> getMinecraftJarConfiguration() {
 		return minecraftJarConfiguration;
 	}
 
@@ -395,7 +396,7 @@ public abstract class LoomGradleExtensionApiImpl implements LoomGradleExtensionA
 		splitEnvironmentalSourceSet.finalizeValue();
 		minecraftJarConfiguration.finalizeValue();
 
-		MinecraftSourceSets.get(getProject()).evaluateSplit(getProject());
+		CosmicReachSourceSets.get(getProject()).evaluateSplit(getProject());
 	}
 
 	@Override
@@ -461,7 +462,7 @@ public abstract class LoomGradleExtensionApiImpl implements LoomGradleExtensionA
 
 	@Override
 	public Provider<String> getMinecraftVersion() {
-		return getProject().provider(() -> LoomGradleExtension.get(getProject()).getMinecraftProvider().minecraftVersion());
+		return getProject().provider(() -> LoomGradleExtension.get(getProject()).getCosmicReachProvider().minecraftVersion());
 	}
 
 	@Override

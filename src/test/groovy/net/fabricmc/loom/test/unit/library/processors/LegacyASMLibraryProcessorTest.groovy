@@ -24,8 +24,8 @@
 
 package net.fabricmc.loom.test.unit.library.processors
 
-import net.fabricmc.loom.configuration.providers.minecraft.library.LibraryProcessor
-import net.fabricmc.loom.configuration.providers.minecraft.library.processors.LegacyASMLibraryProcessor
+import net.fabricmc.loom.configuration.providers.cosmicreach.library.LibraryProcessor
+import net.fabricmc.loom.configuration.providers.cosmicreach.library.processors.LegacyASMLibraryProcessor
 import net.fabricmc.loom.test.util.PlatformTestUtils
 
 class LegacyASMLibraryProcessorTest extends LibraryProcessorTest {

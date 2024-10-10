@@ -52,8 +52,8 @@ import net.fabricmc.loom.api.remapping.RemapperParameters;
 import net.fabricmc.loom.configuration.ide.RunConfigSettings;
 import net.fabricmc.loom.configuration.processors.JarProcessor;
 import net.fabricmc.loom.configuration.providers.mappings.NoOpIntermediateMappingsProvider;
-import net.fabricmc.loom.configuration.providers.minecraft.ManifestLocations;
-import net.fabricmc.loom.configuration.providers.minecraft.MinecraftJarConfiguration;
+import net.fabricmc.loom.configuration.providers.cosmicreach.ManifestLocations;
+import net.fabricmc.loom.configuration.providers.cosmicreach.CosmicReachJarConfiguration;
 import net.fabricmc.loom.task.GenerateSourcesTask;
 import net.fabricmc.loom.util.DeprecationHelper;
 
@@ -223,18 +223,18 @@ public interface LoomGradleExtensionAPI {
 	Property<String> getIntermediaryUrl();
 
 	@ApiStatus.Experimental
-	Property<MinecraftJarConfiguration<?, ?, ?>> getMinecraftJarConfiguration();
+	Property<CosmicReachJarConfiguration<?, ?, ?>> getMinecraftJarConfiguration();
 
 	default void serverOnlyMinecraftJar() {
-		getMinecraftJarConfiguration().set(MinecraftJarConfiguration.SERVER_ONLY);
+		getMinecraftJarConfiguration().set(CosmicReachJarConfiguration.SERVER_ONLY);
 	}
 
 	default void clientOnlyMinecraftJar() {
-		getMinecraftJarConfiguration().set(MinecraftJarConfiguration.CLIENT_ONLY);
+		getMinecraftJarConfiguration().set(CosmicReachJarConfiguration.CLIENT_ONLY);
 	}
 
 	default void splitMinecraftJar() {
-		getMinecraftJarConfiguration().set(MinecraftJarConfiguration.SPLIT);
+		getMinecraftJarConfiguration().set(CosmicReachJarConfiguration.SPLIT);
 	}
 
 	void splitEnvironmentSourceSets();

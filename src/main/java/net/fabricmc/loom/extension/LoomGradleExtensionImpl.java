@@ -50,11 +50,11 @@ import net.fabricmc.loom.configuration.providers.mappings.IntermediaryMappingsPr
 import net.fabricmc.loom.configuration.providers.mappings.LayeredMappingsFactory;
 import net.fabricmc.loom.configuration.providers.mappings.MappingConfiguration;
 import net.fabricmc.loom.configuration.providers.mappings.NoOpIntermediateMappingsProvider;
-import net.fabricmc.loom.configuration.providers.minecraft.MinecraftMetadataProvider;
-import net.fabricmc.loom.configuration.providers.minecraft.MinecraftProvider;
-import net.fabricmc.loom.configuration.providers.minecraft.library.LibraryProcessorManager;
-import net.fabricmc.loom.configuration.providers.minecraft.mapped.IntermediaryMinecraftProvider;
-import net.fabricmc.loom.configuration.providers.minecraft.mapped.NamedMinecraftProvider;
+import net.fabricmc.loom.configuration.providers.cosmicreach.CosmicReachMetadataProvider;
+import net.fabricmc.loom.configuration.providers.cosmicreach.CosmicReachProvider;
+import net.fabricmc.loom.configuration.providers.cosmicreach.library.LibraryProcessorManager;
+import net.fabricmc.loom.configuration.providers.cosmicreach.mapped.IntermediaryCosmicReachProvider;
+import net.fabricmc.loom.configuration.providers.cosmicreach.mapped.NamedCosmicReachProvider;
 import net.fabricmc.loom.util.download.Download;
 import net.fabricmc.loom.util.download.DownloadBuilder;
 
@@ -67,11 +67,11 @@ public abstract class LoomGradleExtensionImpl extends LoomGradleExtensionApiImpl
 	private final List<AccessWidenerFile> transitiveAccessWideners = new ArrayList<>();
 
 	private LoomDependencyManager dependencyManager;
-	private MinecraftMetadataProvider metadataProvider;
-	private MinecraftProvider minecraftProvider;
+	private CosmicReachMetadataProvider metadataProvider;
+	private CosmicReachProvider minecraftProvider;
 	private MappingConfiguration mappingConfiguration;
-	private NamedMinecraftProvider<?> namedMinecraftProvider;
-	private IntermediaryMinecraftProvider<?> intermediaryMinecraftProvider;
+	private NamedCosmicReachProvider<?> namedMinecraftProvider;
+	private IntermediaryCosmicReachProvider<?> intermediaryMinecraftProvider;
 	private InstallerData installerData;
 	private boolean refreshDeps;
 	private final ListProperty<LibraryProcessorManager.LibraryProcessorFactory> libraryProcessorFactories;
@@ -133,22 +133,22 @@ public abstract class LoomGradleExtensionImpl extends LoomGradleExtensionApiImpl
 	}
 
 	@Override
-	public MinecraftMetadataProvider getMetadataProvider() {
+	public CosmicReachMetadataProvider getMetadataProvider() {
 		return Objects.requireNonNull(metadataProvider, "Cannot get MinecraftMetadataProvider before it has been setup");
 	}
 
 	@Override
-	public void setMetadataProvider(MinecraftMetadataProvider metadataProvider) {
+	public void setMetadataProvider(CosmicReachMetadataProvider metadataProvider) {
 		this.metadataProvider = metadataProvider;
 	}
 
 	@Override
-	public MinecraftProvider getMinecraftProvider() {
+	public CosmicReachProvider getCosmicReachProvider() {
 		return Objects.requireNonNull(minecraftProvider, "Cannot get MinecraftProvider before it has been setup");
 	}
 
 	@Override
-	public void setMinecraftProvider(MinecraftProvider minecraftProvider) {
+	public void setMinecraftProvider(CosmicReachProvider minecraftProvider) {
 		this.minecraftProvider = minecraftProvider;
 	}
 
@@ -163,22 +163,22 @@ public abstract class LoomGradleExtensionImpl extends LoomGradleExtensionApiImpl
 	}
 
 	@Override
-	public NamedMinecraftProvider<?> getNamedMinecraftProvider() {
+	public NamedCosmicReachProvider<?> getNamedCosmicReachProvider() {
 		return Objects.requireNonNull(namedMinecraftProvider, "Cannot get NamedMinecraftProvider before it has been setup");
 	}
 
 	@Override
-	public IntermediaryMinecraftProvider<?> getIntermediaryMinecraftProvider() {
+	public IntermediaryCosmicReachProvider<?> getIntermediaryMinecraftProvider() {
 		return Objects.requireNonNull(intermediaryMinecraftProvider, "Cannot get IntermediaryMinecraftProvider before it has been setup");
 	}
 
 	@Override
-	public void setNamedMinecraftProvider(NamedMinecraftProvider<?> namedMinecraftProvider) {
+	public void setNamedMinecraftProvider(NamedCosmicReachProvider<?> namedMinecraftProvider) {
 		this.namedMinecraftProvider = namedMinecraftProvider;
 	}
 
 	@Override
-	public void setIntermediaryMinecraftProvider(IntermediaryMinecraftProvider<?> intermediaryMinecraftProvider) {
+	public void setIntermediaryMinecraftProvider(IntermediaryCosmicReachProvider<?> intermediaryMinecraftProvider) {
 		this.intermediaryMinecraftProvider = intermediaryMinecraftProvider;
 	}
 
@@ -283,13 +283,13 @@ public abstract class LoomGradleExtensionImpl extends LoomGradleExtensionApiImpl
 
 	@Override
 	protected <T extends IntermediateMappingsProvider> void configureIntermediateMappingsProviderInternal(T provider) {
-		provider.getMinecraftVersion().set(getProject().provider(() -> getMinecraftProvider().minecraftVersion()));
+		provider.getMinecraftVersion().set(getProject().provider(() -> getCosmicReachProvider().minecraftVersion()));
 		provider.getMinecraftVersion().disallowChanges();
 
 		provider.getDownloader().set(this::download);
 		provider.getDownloader().disallowChanges();
 
-		provider.getIsLegacyMinecraft().set(getProject().provider(() -> getMinecraftProvider().isLegacyVersion()));
+		provider.getIsLegacyMinecraft().set(getProject().provider(() -> false));
 		provider.getIsLegacyMinecraft().disallowChanges();
 	}
 

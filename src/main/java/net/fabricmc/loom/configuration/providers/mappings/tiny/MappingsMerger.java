@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
 
 import net.fabricmc.loom.api.mappings.layered.MappingsNamespace;
 import net.fabricmc.loom.configuration.providers.mappings.IntermediateMappingsService;
-import net.fabricmc.loom.configuration.providers.minecraft.MinecraftProvider;
+import net.fabricmc.loom.configuration.providers.cosmicreach.CosmicReachProvider;
 import net.fabricmc.mappingio.adapter.MappingSourceNsSwitch;
 import net.fabricmc.mappingio.format.tiny.Tiny2FileReader;
 import net.fabricmc.mappingio.format.tiny.Tiny2FileWriter;
@@ -50,15 +50,15 @@ import net.fabricmc.mappingio.tree.MemoryMappingTree;
 public final class MappingsMerger {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MappingsMerger.class);
 
-	public static void mergeAndSaveMappings(Path from, Path out, MinecraftProvider minecraftProvider, IntermediateMappingsService intermediateMappingsService) throws IOException {
+	public static void mergeAndSaveMappings(Path from, Path out, CosmicReachProvider minecraftProvider, IntermediateMappingsService intermediateMappingsService) throws IOException {
 		Stopwatch stopwatch = Stopwatch.createStarted();
 		LOGGER.info(":merging mappings");
 
-		if (minecraftProvider.isLegacyVersion()) {
-			legacyMergeAndSaveMappings(from, out, intermediateMappingsService);
-		} else {
+//		if (minecraftProvider.isLegacyVersion()) {
+//			legacyMergeAndSaveMappings(from, out, intermediateMappingsService);
+//		} else {
 			mergeAndSaveMappings(from, out, intermediateMappingsService);
-		}
+//		}
 
 		LOGGER.info(":merged mappings in " + stopwatch.stop());
 	}

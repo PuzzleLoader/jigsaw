@@ -62,7 +62,7 @@ import net.fabricmc.loom.api.RemapConfigurationSettings;
 import net.fabricmc.loom.configuration.RemapConfigurations;
 import net.fabricmc.loom.configuration.mods.dependency.ModDependency;
 import net.fabricmc.loom.configuration.mods.dependency.ModDependencyFactory;
-import net.fabricmc.loom.configuration.providers.minecraft.MinecraftSourceSets;
+import net.fabricmc.loom.configuration.providers.cosmicreach.CosmicReachSourceSets;
 import net.fabricmc.loom.util.Checksum;
 import net.fabricmc.loom.util.Constants;
 import net.fabricmc.loom.util.ExceptionUtil;
@@ -114,7 +114,7 @@ public class ModConfigurationRemapper {
 				// If our remap configuration entry targets the client source set as well,
 				// let's set up a collector for it too.
 				if (entry.getClientSourceConfigurationName().isPresent()) {
-					final SourceSet clientSourceSet = SourceSetHelper.getSourceSetByName(MinecraftSourceSets.Split.CLIENT_ONLY_SOURCE_SET_NAME, project);
+					final SourceSet clientSourceSet = SourceSetHelper.getSourceSetByName(CosmicReachSourceSets.Split.CLIENT_ONLY_SOURCE_SET_NAME, project);
 					final Configuration clientTarget = RemapConfigurations.getOrCreateCollectorConfiguration(project, clientSourceSet, runtime);
 					clientConfigsToRemap.put(sourceCopy, clientTarget);
 				}
@@ -151,7 +151,7 @@ public class ModConfigurationRemapper {
 
 				artifactMetadata = metaCache.computeIfAbsent(artifact, a -> {
 					try {
-						return ArtifactMetadata.create(a, LoomGradlePlugin.LOOM_VERSION);
+						return ArtifactMetadata.create(a, LoomGradlePlugin.JIGSAW_VERSION);
 					} catch (IOException e) {
 						throw ExceptionUtil.createDescriptiveWrapper(UncheckedIOException::new, "Failed to read metadata from " + a.path(), e);
 					}

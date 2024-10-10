@@ -52,7 +52,7 @@ import net.fabricmc.loom.LoomGradlePlugin;
 import net.fabricmc.loom.configuration.DependencyInfo;
 import net.fabricmc.loom.configuration.providers.mappings.tiny.MappingsMerger;
 import net.fabricmc.loom.configuration.providers.mappings.tiny.TinyJarInfo;
-import net.fabricmc.loom.configuration.providers.minecraft.MinecraftProvider;
+import net.fabricmc.loom.configuration.providers.cosmicreach.CosmicReachProvider;
 import net.fabricmc.loom.util.Constants;
 import net.fabricmc.loom.util.DeletingFileVisitor;
 import net.fabricmc.loom.util.FileSystemUtil;
@@ -90,7 +90,7 @@ public class MappingConfiguration {
 		this.unpickDefinitions = mappingsWorkingDir.resolve("mappings.unpick");
 	}
 
-	public static MappingConfiguration create(Project project, ServiceFactory serviceFactory, DependencyInfo dependency, MinecraftProvider minecraftProvider) {
+	public static MappingConfiguration create(Project project, ServiceFactory serviceFactory, DependencyInfo dependency, CosmicReachProvider minecraftProvider) {
 		final String version = dependency.getResolvedVersion();
 		final Path inputJar = dependency.resolveFile().orElseThrow(() -> new RuntimeException("Could not resolve mappings: " + dependency)).toPath();
 		final String mappingsName = StringUtils.removeSuffix(dependency.getDependency().getGroup() + "." + dependency.getDependency().getName(), "-unmerged");
@@ -125,7 +125,7 @@ public class MappingConfiguration {
 		return serviceFactory.get(getMappingsServiceOptions(project));
 	}
 
-	private void setup(Project project, ServiceFactory serviceFactory, MinecraftProvider minecraftProvider, Path inputJar) throws IOException {
+	private void setup(Project project, ServiceFactory serviceFactory, CosmicReachProvider minecraftProvider, Path inputJar) throws IOException {
 		if (minecraftProvider.refreshDeps()) {
 			cleanWorkingDirectory(mappingsWorkingDir);
 		}
@@ -169,7 +169,7 @@ public class MappingConfiguration {
 		return isV2 ? "-v2" : "";
 	}
 
-	private void storeMappings(Project project, ServiceFactory serviceFactory, MinecraftProvider minecraftProvider, Path inputJar) throws IOException {
+	private void storeMappings(Project project, ServiceFactory serviceFactory, CosmicReachProvider minecraftProvider, Path inputJar) throws IOException {
 		LOGGER.info(":extracting " + inputJar.getFileName());
 
 		try (FileSystemUtil.Delegate delegate = FileSystemUtil.getJarFileSystem(inputJar)) {
@@ -183,7 +183,7 @@ public class MappingConfiguration {
 
 			MappingsMerger.mergeAndSaveMappings(baseTinyMappings, tinyMappings, minecraftProvider, intermediateMappingsService);
 		} else {
-			final List<Path> minecraftJars = minecraftProvider.getMinecraftJars();
+			final List<Path> minecraftJars = minecraftProvider.getCosmicReachJars();
 
 			if (minecraftJars.size() != 1) {
 				throw new UnsupportedOperationException("V1 mappings only support single jar minecraft providers");

@@ -30,7 +30,8 @@ import org.objectweb.asm.Opcodes;
 public class Constants {
 	public static final String LIBRARIES_BASE = "https://libraries.minecraft.net/";
 	public static final String RESOURCES_BASE = "https://resources.download.minecraft.net/";
-	public static final String VERSION_MANIFESTS = "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json";
+//	public static final String VERSION_MANIFESTS = "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json";
+	public static final String VERSION_MANIFESTS = "https://raw.githubusercontent.com/CRModders/CosmicArchive/refs/heads/main/versions.json";
 	public static final String EXPERIMENTAL_VERSIONS = "https://maven.fabricmc.net/net/minecraft/experimental_versions.json";
 	public static final String FABRIC_REPOSITORY = "https://maven.fabricmc.net/";
 
@@ -48,27 +49,27 @@ public class Constants {
 		public static final String MOD_COMPILE_CLASSPATH_MAPPED = "modCompileClasspathMapped";
 		public static final String INCLUDE = "include";
 		public static final String INCLUDE_INTERNAL = "includeInternal";
-		public static final String MINECRAFT = "minecraft";
+		public static final String COSMICREACH = "cosmicReach";
 
-		public static final String MINECRAFT_COMPILE_LIBRARIES = "minecraftLibraries";
-		public static final String MINECRAFT_RUNTIME_LIBRARIES = "minecraftRuntimeLibraries";
+		public static final String COSMICREACH_COMPILE_LIBRARIES = "minecraftLibraries";
+		public static final String COSMICREACH_RUNTIME_LIBRARIES = "minecraftRuntimeLibraries";
 
 		/**
 		 * These configurations contain the minecraft client libraries.
 		 */
-		public static final String MINECRAFT_CLIENT_COMPILE_LIBRARIES = "minecraftClientLibraries";
-		public static final String MINECRAFT_CLIENT_RUNTIME_LIBRARIES = "minecraftClientRuntimeLibraries";
+		public static final String COSMICREACH_CLIENT_COMPILE_LIBRARIES = "minecraftClientLibraries";
+		public static final String COSMICREACH_CLIENT_RUNTIME_LIBRARIES = "minecraftClientRuntimeLibraries";
 
 		/**
 		 * The server specific configurations will be empty when using a legacy (pre 21w38a server jar)
 		 * find the client only dependencies on the "minecraftLibraries" config.
 		 */
-		public static final String MINECRAFT_SERVER_COMPILE_LIBRARIES = "minecraftServerLibraries";
-		public static final String MINECRAFT_SERVER_RUNTIME_LIBRARIES = "minecraftServerRuntimeLibraries";
+		public static final String COSMICREACH_SERVER_COMPILE_LIBRARIES = "minecraftServerLibraries";
+		public static final String COSMICREACH_SERVER_RUNTIME_LIBRARIES = "minecraftServerRuntimeLibraries";
 		/**
 		 * Before Minecraft 1.19-pre1 this contains libraries that need to be extracted otherwise this goes on the runtime classpath.
 		 */
-		public static final String MINECRAFT_NATIVES = "minecraftNatives";
+		public static final String COSMICREACH_NATIVES = "minecraftNatives";
 		public static final String MAPPINGS = "mappings";
 		public static final String MAPPINGS_FINAL = "mappingsFinal";
 		public static final String LOADER_DEPENDENCIES = "loaderLibraries";
@@ -108,7 +109,7 @@ public class Constants {
 	}
 
 	public static final class TaskGroup {
-		public static final String FABRIC = "fabric";
+		public static final String PUZZLE = "fabric";
 		public static final String IDE = "ide";
 
 		private TaskGroup() {

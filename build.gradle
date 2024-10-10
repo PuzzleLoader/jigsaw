@@ -273,8 +273,8 @@ codenarc {
 
 gradlePlugin {
 	plugins {
-		fabricLoom {
-			id = 'fabric-loom'
+		jigsaw {
+			id = 'jigsaw'
 			implementationClass = 'net.fabricmc.loom.bootstrap.LoomGradlePluginBootstrap'
 		}
 	}
@@ -329,8 +329,8 @@ publishing {
 
 			// Manually crate the plugin marker for snapshot versions
 			snapshotPlugin(MavenPublication) { publication ->
-				groupId 'fabric-loom'
-				artifactId 'fabric-loom.gradle.plugin'
+				groupId 'jigsaw'
+				artifactId 'jigsaw.gradle.plugin'
 				version baseVersion + '-SNAPSHOT'
 
 				pom.withXml({

@@ -41,11 +41,11 @@ import net.fabricmc.loom.configuration.LoomDependencyManager;
 import net.fabricmc.loom.configuration.accesswidener.AccessWidenerFile;
 import net.fabricmc.loom.configuration.providers.mappings.LayeredMappingsFactory;
 import net.fabricmc.loom.configuration.providers.mappings.MappingConfiguration;
-import net.fabricmc.loom.configuration.providers.minecraft.MinecraftMetadataProvider;
-import net.fabricmc.loom.configuration.providers.minecraft.MinecraftProvider;
-import net.fabricmc.loom.configuration.providers.minecraft.library.LibraryProcessorManager;
-import net.fabricmc.loom.configuration.providers.minecraft.mapped.IntermediaryMinecraftProvider;
-import net.fabricmc.loom.configuration.providers.minecraft.mapped.NamedMinecraftProvider;
+import net.fabricmc.loom.configuration.providers.cosmicreach.CosmicReachMetadataProvider;
+import net.fabricmc.loom.configuration.providers.cosmicreach.CosmicReachProvider;
+import net.fabricmc.loom.configuration.providers.cosmicreach.library.LibraryProcessorManager;
+import net.fabricmc.loom.configuration.providers.cosmicreach.mapped.IntermediaryCosmicReachProvider;
+import net.fabricmc.loom.configuration.providers.cosmicreach.mapped.NamedCosmicReachProvider;
 import net.fabricmc.loom.extension.LoomFiles;
 import net.fabricmc.loom.extension.MixinExtension;
 import net.fabricmc.loom.extension.RemapperExtensionHolder;
@@ -69,31 +69,31 @@ public interface LoomGradleExtension extends LoomGradleExtensionAPI {
 
 	LoomDependencyManager getDependencyManager();
 
-	MinecraftMetadataProvider getMetadataProvider();
+	CosmicReachMetadataProvider getMetadataProvider();
 
-	void setMetadataProvider(MinecraftMetadataProvider metadataProvider);
+	void setMetadataProvider(CosmicReachMetadataProvider metadataProvider);
 
-	MinecraftProvider getMinecraftProvider();
+	CosmicReachProvider getCosmicReachProvider();
 
-	void setMinecraftProvider(MinecraftProvider minecraftProvider);
+	void setMinecraftProvider(CosmicReachProvider minecraftProvider);
 
 	MappingConfiguration getMappingConfiguration();
 
 	void setMappingConfiguration(MappingConfiguration mappingConfiguration);
 
-	NamedMinecraftProvider<?> getNamedMinecraftProvider();
+	NamedCosmicReachProvider<?> getNamedCosmicReachProvider();
 
-	IntermediaryMinecraftProvider<?> getIntermediaryMinecraftProvider();
+	IntermediaryCosmicReachProvider<?> getIntermediaryMinecraftProvider();
 
-	void setNamedMinecraftProvider(NamedMinecraftProvider<?> namedMinecraftProvider);
+	void setNamedMinecraftProvider(NamedCosmicReachProvider<?> namedMinecraftProvider);
 
-	void setIntermediaryMinecraftProvider(IntermediaryMinecraftProvider<?> intermediaryMinecraftProvider);
+	void setIntermediaryMinecraftProvider(IntermediaryCosmicReachProvider<?> intermediaryMinecraftProvider);
 
 	default List<Path> getMinecraftJars(MappingsNamespace mappingsNamespace) {
 		return switch (mappingsNamespace) {
-		case NAMED -> getNamedMinecraftProvider().getMinecraftJarPaths();
+		case NAMED -> getNamedCosmicReachProvider().getMinecraftJarPaths();
 		case INTERMEDIARY -> getIntermediaryMinecraftProvider().getMinecraftJarPaths();
-		case OFFICIAL, CLIENT_OFFICIAL, SERVER_OFFICIAL -> getMinecraftProvider().getMinecraftJars();
+		case OFFICIAL, CLIENT_OFFICIAL, SERVER_OFFICIAL -> getCosmicReachProvider().getCosmicReachJars();
 		};
 	}
 

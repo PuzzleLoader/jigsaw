@@ -43,7 +43,7 @@ import net.fabricmc.loom.LoomGradleExtension;
 import net.fabricmc.loom.api.mappings.layered.MappingsNamespace;
 import net.fabricmc.loom.configuration.ConfigContextImpl;
 import net.fabricmc.loom.configuration.processors.MappingProcessorContextImpl;
-import net.fabricmc.loom.configuration.processors.MinecraftJarProcessorManager;
+import net.fabricmc.loom.configuration.processors.CosmicReachJarProcessorManager;
 import net.fabricmc.loom.task.GenerateSourcesTask;
 import net.fabricmc.loom.util.service.ScopedServiceFactory;
 import net.fabricmc.loom.util.service.Service;
@@ -84,7 +84,7 @@ public class SourceMappingsService extends Service<SourceMappingsService.Options
 
 		final List<GenerateSourcesTask.MappingsProcessor> mappingsProcessors = new ArrayList<>();
 
-		MinecraftJarProcessorManager minecraftJarProcessorManager = MinecraftJarProcessorManager.create(project);
+		CosmicReachJarProcessorManager minecraftJarProcessorManager = CosmicReachJarProcessorManager.create(project);
 
 		if (minecraftJarProcessorManager != null) {
 			mappingsProcessors.add(mappings -> {

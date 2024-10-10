@@ -29,8 +29,8 @@ import java.nio.file.Path
 
 import org.intellij.lang.annotations.Language
 
-import net.fabricmc.loom.configuration.providers.minecraft.ManifestLocations
-import net.fabricmc.loom.configuration.providers.minecraft.MinecraftMetadataProvider
+import net.fabricmc.loom.configuration.providers.cosmicreach.ManifestLocations
+import net.fabricmc.loom.configuration.providers.cosmicreach.CosmicReachMetadataProvider
 import net.fabricmc.loom.test.LoomTestConstants
 import net.fabricmc.loom.test.unit.download.DownloadTest
 import net.fabricmc.loom.util.download.Download
@@ -145,19 +145,19 @@ class MinecraftMetadataProviderTest extends DownloadTest {
 		calls == 4
 	}
 
-	private MinecraftMetadataProvider provider(String version, String customUrl = null) {
-		return new MinecraftMetadataProvider(
+	private CosmicReachMetadataProvider provider(String version, String customUrl = null) {
+		return new CosmicReachMetadataProvider(
 				options(version, customUrl),
 				Download.&create
 				)
 	}
 
-	private MinecraftMetadataProvider.Options options(String version, String customUrl) {
+	private CosmicReachMetadataProvider.Options options(String version, String customUrl) {
 		ManifestLocations manifests = new ManifestLocations()
 		manifests.add("test", "$PATH/versionManifest", 0)
 		manifests.add("test_experimental", "$PATH/experimentalVersionManifest", 1)
 
-		return new MinecraftMetadataProvider.Options(
+		return new CosmicReachMetadataProvider.Options(
 				version,
 				manifests,
 				customUrl,

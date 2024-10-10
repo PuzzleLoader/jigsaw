@@ -84,7 +84,7 @@ public abstract class RemapTaskConfiguration implements Runnable {
 			// Basic task setup
 			task.dependsOn(jarTask);
 			task.setDescription("Remaps the built project jar to intermediary mappings.");
-			task.setGroup(Constants.TaskGroup.FABRIC);
+			task.setGroup(Constants.TaskGroup.PUZZLE);
 			getArtifacts().add(JavaPlugin.API_ELEMENTS_CONFIGURATION_NAME, task);
 			getArtifacts().add(JavaPlugin.RUNTIME_ELEMENTS_CONFIGURATION_NAME, task);
 
@@ -130,7 +130,7 @@ public abstract class RemapTaskConfiguration implements Runnable {
 
 		TaskProvider<RemapSourcesJarTask> remapSourcesTask = getTasks().register(REMAP_SOURCES_JAR_TASK_NAME, RemapSourcesJarTask.class, task -> {
 			task.setDescription("Remaps the default sources jar to intermediary mappings.");
-			task.setGroup(Constants.TaskGroup.FABRIC);
+			task.setGroup(Constants.TaskGroup.PUZZLE);
 			task.getIncludesClientOnlyClasses().set(getProject().provider(extension::areEnvironmentSourceSetsSplit));
 		});
 

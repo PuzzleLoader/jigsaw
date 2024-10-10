@@ -27,7 +27,7 @@ package net.fabricmc.loom.test.unit.processor
 import spock.lang.Specification
 
 import net.fabricmc.loom.api.processor.SpecContext
-import net.fabricmc.loom.configuration.processors.MinecraftJarProcessorManager
+import net.fabricmc.loom.configuration.processors.CosmicReachJarProcessorManager
 import net.fabricmc.loom.test.util.processor.TestMinecraftJarProcessor
 
 class MinecraftJarProcessorManagerTest extends Specification {
@@ -37,8 +37,8 @@ class MinecraftJarProcessorManagerTest extends Specification {
 
 		def processor1 = new TestMinecraftJarProcessor(input: "Test1")
 		def processor2 = new TestMinecraftJarProcessor(input: "Test2")
-		def manager1 = MinecraftJarProcessorManager.create([processor1, processor2], specContext)
-		def manager2 = MinecraftJarProcessorManager.create([processor1, processor2], specContext)
+		def manager1 = CosmicReachJarProcessorManager.create([processor1, processor2], specContext)
+		def manager2 = CosmicReachJarProcessorManager.create([processor1, processor2], specContext)
 
 		then:
 		manager1.jarHash == manager2.jarHash
@@ -51,8 +51,8 @@ class MinecraftJarProcessorManagerTest extends Specification {
 
 		def processor1 = new TestMinecraftJarProcessor(input: "Test1")
 		def processor2 = new TestMinecraftJarProcessor(input: "Test2")
-		def manager1 = MinecraftJarProcessorManager.create([processor1], specContext)
-		def manager2 = MinecraftJarProcessorManager.create([processor1, processor2], specContext)
+		def manager1 = CosmicReachJarProcessorManager.create([processor1], specContext)
+		def manager2 = CosmicReachJarProcessorManager.create([processor1, processor2], specContext)
 
 		then:
 		manager1.jarHash != manager2.jarHash

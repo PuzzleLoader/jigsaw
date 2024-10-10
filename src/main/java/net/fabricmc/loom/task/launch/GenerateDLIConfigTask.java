@@ -48,8 +48,8 @@ import org.gradle.api.tasks.TaskAction;
 
 import net.fabricmc.loom.LoomGradleExtension;
 import net.fabricmc.loom.LoomGradlePlugin;
-import net.fabricmc.loom.configuration.providers.minecraft.MinecraftVersionMeta;
-import net.fabricmc.loom.configuration.providers.minecraft.mapped.MappedMinecraftProvider;
+import net.fabricmc.loom.configuration.providers.cosmicreach.CosmicReachVersionMeta;
+import net.fabricmc.loom.configuration.providers.cosmicreach.mapped.MappedCosmicReachProvider;
 import net.fabricmc.loom.task.AbstractLoomTask;
 import net.fabricmc.loom.util.gradle.SourceSetHelper;
 
@@ -97,8 +97,8 @@ public abstract class GenerateDLIConfigTask extends AbstractLoomTask {
 	protected abstract RegularFileProperty getDevLauncherConfig();
 
 	public GenerateDLIConfigTask() {
-		getVersionInfoJson().set(LoomGradlePlugin.GSON.toJson(getExtension().getMinecraftProvider().getVersionInfo()));
-		getMinecraftVersion().set(getExtension().getMinecraftProvider().minecraftVersion());
+		getVersionInfoJson().set(LoomGradlePlugin.GSON.toJson(getExtension().getCosmicReachProvider().getVersionInfo()));
+		getMinecraftVersion().set(getExtension().getCosmicReachProvider().minecraftVersion());
 		getSplitSourceSets().set(getExtension().areEnvironmentSourceSetsSplit());
 		getANSISupportedIDE().set(ansiSupportedIde(getProject()));
 		getPlainConsole().set(getProject().getGradle().getStartParameter().getConsoleOutput() == ConsoleOutput.Plain);
@@ -121,7 +121,7 @@ public abstract class GenerateDLIConfigTask extends AbstractLoomTask {
 
 	@TaskAction
 	public void run() throws IOException {
-		final MinecraftVersionMeta versionInfo = LoomGradlePlugin.GSON.fromJson(getVersionInfoJson().get(), MinecraftVersionMeta.class);
+		final CosmicReachVersionMeta versionInfo = LoomGradlePlugin.GSON.fromJson(getVersionInfoJson().get(), CosmicReachVersionMeta.class);
 		File assetsDirectory = new File(getAssetsDirectoryPath().get());
 
 		if (versionInfo.assets().equals("legacy")) {
@@ -171,7 +171,7 @@ public abstract class GenerateDLIConfigTask extends AbstractLoomTask {
 	}
 
 	private String getGameJarPath(String env) {
-		MappedMinecraftProvider.Split split = (MappedMinecraftProvider.Split) getExtension().getNamedMinecraftProvider();
+		MappedCosmicReachProvider.Split split = (MappedCosmicReachProvider.Split) getExtension().getNamedCosmicReachProvider();
 
 		return switch (env) {
 		case "client" -> split.getClientOnlyJar().getPath().toAbsolutePath().toString();

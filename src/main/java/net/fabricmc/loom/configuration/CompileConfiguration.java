@@ -56,16 +56,16 @@ import net.fabricmc.loom.build.mixin.KaptApInvoker;
 import net.fabricmc.loom.build.mixin.ScalaApInvoker;
 import net.fabricmc.loom.configuration.accesswidener.AccessWidenerJarProcessor;
 import net.fabricmc.loom.configuration.ifaceinject.InterfaceInjectionProcessor;
-import net.fabricmc.loom.configuration.processors.MinecraftJarProcessorManager;
+import net.fabricmc.loom.configuration.processors.CosmicReachJarProcessorManager;
 import net.fabricmc.loom.configuration.processors.ModJavadocProcessor;
 import net.fabricmc.loom.configuration.providers.mappings.LayeredMappingsFactory;
 import net.fabricmc.loom.configuration.providers.mappings.MappingConfiguration;
-import net.fabricmc.loom.configuration.providers.minecraft.MinecraftMetadataProvider;
-import net.fabricmc.loom.configuration.providers.minecraft.MinecraftProvider;
-import net.fabricmc.loom.configuration.providers.minecraft.MinecraftSourceSets;
-import net.fabricmc.loom.configuration.providers.minecraft.mapped.AbstractMappedMinecraftProvider;
-import net.fabricmc.loom.configuration.providers.minecraft.mapped.IntermediaryMinecraftProvider;
-import net.fabricmc.loom.configuration.providers.minecraft.mapped.NamedMinecraftProvider;
+import net.fabricmc.loom.configuration.providers.cosmicreach.CosmicReachMetadataProvider;
+import net.fabricmc.loom.configuration.providers.cosmicreach.CosmicReachProvider;
+import net.fabricmc.loom.configuration.providers.cosmicreach.CosmicReachSourceSets;
+import net.fabricmc.loom.configuration.providers.cosmicreach.mapped.AbstractMappedCosmicReachProvider;
+import net.fabricmc.loom.configuration.providers.cosmicreach.mapped.IntermediaryCosmicReachProvider;
+import net.fabricmc.loom.configuration.providers.cosmicreach.mapped.NamedCosmicReachProvider;
 import net.fabricmc.loom.extension.MixinExtension;
 import net.fabricmc.loom.util.Checksum;
 import net.fabricmc.loom.util.ExceptionUtil;
@@ -94,7 +94,7 @@ public abstract class CompileConfiguration implements Runnable {
 		afterEvaluationWithService((serviceFactory) -> {
 			final ConfigContext configContext = new ConfigContextImpl(getProject(), serviceFactory, extension);
 
-			MinecraftSourceSets.get(getProject()).afterEvaluate(getProject());
+			CosmicReachSourceSets.get(getProject()).afterEvaluate(getProject());
 
 			final boolean previousRefreshDeps = extension.refreshDeps();
 
@@ -151,13 +151,13 @@ public abstract class CompileConfiguration implements Runnable {
 		final Project project = configContext.project();
 		final LoomGradleExtension extension = configContext.extension();
 
-		final MinecraftMetadataProvider metadataProvider = MinecraftMetadataProvider.create(configContext);
+		final CosmicReachMetadataProvider metadataProvider = CosmicReachMetadataProvider.create(configContext);
 		extension.setMetadataProvider(metadataProvider);
 
 		var jarConfiguration = extension.getMinecraftJarConfiguration().get();
 
 		// Provide the vanilla mc jars
-		final MinecraftProvider minecraftProvider = jarConfiguration.createMinecraftProvider(metadataProvider, configContext);
+		final CosmicReachProvider minecraftProvider = jarConfiguration.createMinecraftProvider(metadataProvider, configContext);
 		extension.setMinecraftProvider(minecraftProvider);
 		minecraftProvider.provide();
 
@@ -170,18 +170,18 @@ public abstract class CompileConfiguration implements Runnable {
 		mappingConfiguration.applyToProject(getProject(), mappingsDep);
 
 		// Provide the remapped mc jars
-		final IntermediaryMinecraftProvider<?> intermediaryMinecraftProvider = jarConfiguration.createIntermediaryMinecraftProvider(project);
-		NamedMinecraftProvider<?> namedMinecraftProvider = jarConfiguration.createNamedMinecraftProvider(project);
+		final IntermediaryCosmicReachProvider<?> intermediaryMinecraftProvider = jarConfiguration.createIntermediaryMinecraftProvider(project);
+		NamedCosmicReachProvider<?> namedMinecraftProvider = jarConfiguration.createNamedMinecraftProvider(project);
 
 		registerGameProcessors(configContext);
-		MinecraftJarProcessorManager minecraftJarProcessorManager = MinecraftJarProcessorManager.create(getProject());
+		CosmicReachJarProcessorManager minecraftJarProcessorManager = CosmicReachJarProcessorManager.create(getProject());
 
 		if (minecraftJarProcessorManager != null) {
 			// Wrap the named MC provider for one that will provide the processed jars
 			namedMinecraftProvider = jarConfiguration.createProcessedNamedMinecraftProvider(namedMinecraftProvider, minecraftJarProcessorManager);
 		}
 
-		final var provideContext = new AbstractMappedMinecraftProvider.ProvideContext(true, extension.refreshDeps(), configContext);
+		final var provideContext = new AbstractMappedCosmicReachProvider.ProvideContext(true, extension.refreshDeps(), configContext);
 
 		extension.setIntermediaryMinecraftProvider(intermediaryMinecraftProvider);
 		intermediaryMinecraftProvider.provide(provideContext);

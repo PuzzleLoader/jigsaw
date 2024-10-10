@@ -162,7 +162,7 @@ public class MigrateMappingsService extends Service<MigrateMappingsService.Optio
 
 		try {
 			if (mappings.startsWith("net.minecraft:mappings:")) {
-				if (!mappings.endsWith(":" + LoomGradleExtension.get(project).getMinecraftProvider().minecraftVersion())) {
+				if (!mappings.endsWith(":" + LoomGradleExtension.get(project).getCosmicReachProvider().minecraftVersion())) {
 					throw new UnsupportedOperationException("Migrating Mojang mappings is currently only supported for the specified minecraft version");
 				}
 

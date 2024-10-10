@@ -25,13 +25,13 @@
 package net.fabricmc.loom.api.processor;
 
 import net.fabricmc.loom.api.mappings.layered.MappingsNamespace;
-import net.fabricmc.loom.configuration.providers.minecraft.MinecraftJarConfiguration;
+import net.fabricmc.loom.configuration.providers.cosmicreach.CosmicReachJarConfiguration;
 import net.fabricmc.loom.util.LazyCloseable;
 import net.fabricmc.mappingio.tree.MemoryMappingTree;
 import net.fabricmc.tinyremapper.TinyRemapper;
 
 public interface ProcessorContext {
-	MinecraftJarConfiguration getJarConfiguration();
+	CosmicReachJarConfiguration getJarConfiguration();
 
 	boolean isMerged();
 

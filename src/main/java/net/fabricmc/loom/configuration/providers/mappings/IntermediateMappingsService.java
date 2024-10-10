@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
 import net.fabricmc.loom.LoomGradleExtension;
 import net.fabricmc.loom.api.mappings.intermediate.IntermediateMappingsProvider;
 import net.fabricmc.loom.api.mappings.layered.MappingsNamespace;
-import net.fabricmc.loom.configuration.providers.minecraft.MinecraftProvider;
+import net.fabricmc.loom.configuration.providers.cosmicreach.CosmicReachProvider;
 import net.fabricmc.loom.util.service.Service;
 import net.fabricmc.loom.util.service.ServiceFactory;
 import net.fabricmc.loom.util.service.ServiceType;
@@ -74,7 +74,7 @@ public final class IntermediateMappingsService extends Service<IntermediateMappi
 		super(options, serviceFactory);
 	}
 
-	public static Provider<Options> createOptions(Project project, MinecraftProvider minecraftProvider) {
+	public static Provider<Options> createOptions(Project project, CosmicReachProvider minecraftProvider) {
 		final LoomGradleExtension extension = LoomGradleExtension.get(project);
 		final IntermediateMappingsProvider intermediateProvider = extension.getIntermediateMappingsProvider();
 		final Path intermediaryTiny = minecraftProvider.file(intermediateProvider.getName() + ".tiny").toPath();
@@ -98,18 +98,18 @@ public final class IntermediateMappingsService extends Service<IntermediateMappi
 		return createOptions(project, minecraftProvider, intermediaryTiny);
 	}
 
-	private static Provider<Options> createOptions(Project project, MinecraftProvider minecraftProvider, Path intermediaryTiny) {
+	private static Provider<Options> createOptions(Project project, CosmicReachProvider minecraftProvider, Path intermediaryTiny) {
 		final LoomGradleExtension extension = LoomGradleExtension.get(project);
 		final IntermediateMappingsProvider intermediateProvider = extension.getIntermediateMappingsProvider();
 		// When merging legacy versions there will be multiple named namespaces, so use intermediary as the common src ns
 		// Newer versions will use intermediary as the src ns
-		final String expectedSrcNs = minecraftProvider.isLegacyVersion()
-				? MappingsNamespace.INTERMEDIARY.toString() // <1.3
-				: MappingsNamespace.OFFICIAL.toString(); // >=1.3
+//		final String expectedSrcNs = minecraftProvider.isLegacyVersion()
+//				? MappingsNamespace.INTERMEDIARY.toString() // <1.3
+//				: MappingsNamespace.OFFICIAL.toString(); // >=1.3
 
 		return TYPE.create(project, options -> {
 			options.getIntermediaryTiny().set(intermediaryTiny.toFile());
-			options.getExpectedSrcNs().set(expectedSrcNs);
+			options.getExpectedSrcNs().set(MappingsNamespace.INTERMEDIARY.toString());
 			options.getMinecraftVersion().set(intermediateProvider.getMinecraftVersion());
 		});
 	}

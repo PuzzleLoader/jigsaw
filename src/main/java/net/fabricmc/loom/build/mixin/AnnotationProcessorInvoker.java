@@ -43,7 +43,7 @@ import org.gradle.api.tasks.SourceSet;
 
 import net.fabricmc.loom.LoomGradleExtension;
 import net.fabricmc.loom.configuration.ide.idea.IdeaUtils;
-import net.fabricmc.loom.configuration.providers.minecraft.MinecraftSourceSets;
+import net.fabricmc.loom.configuration.providers.cosmicreach.CosmicReachSourceSets;
 import net.fabricmc.loom.extension.MixinExtension;
 import net.fabricmc.loom.util.Constants;
 import net.fabricmc.loom.util.LoomVersions;
@@ -129,7 +129,7 @@ public abstract class AnnotationProcessorInvoker<T extends Task> {
 
 	public void configureMixin() {
 		ConfigurationContainer configs = project.getConfigurations();
-		MinecraftSourceSets minecraftSourceSets = MinecraftSourceSets.get(project);
+		CosmicReachSourceSets minecraftSourceSets = CosmicReachSourceSets.get(project);
 
 		if (!IdeaUtils.isIdeaSync()) {
 			for (Configuration processorConfig : apConfigurations) {

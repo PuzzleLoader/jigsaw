@@ -29,7 +29,7 @@ import java.nio.file.Path;
 
 import net.fabricmc.loom.api.mappings.layered.MappingContext;
 import net.fabricmc.loom.api.mappings.layered.spec.MappingsSpec;
-import net.fabricmc.loom.configuration.providers.minecraft.MinecraftVersionMeta;
+import net.fabricmc.loom.configuration.providers.cosmicreach.CosmicReachVersionMeta;
 import net.fabricmc.loom.util.download.DownloadException;
 
 public record MojangMappingsSpec(boolean nameSyntheticMembers) implements MappingsSpec<MojangMappingLayer> {
@@ -39,9 +39,9 @@ public record MojangMappingsSpec(boolean nameSyntheticMembers) implements Mappin
 
 	@Override
 	public MojangMappingLayer createLayer(MappingContext context) {
-		final MinecraftVersionMeta versionInfo = context.minecraftProvider().getVersionInfo();
-		final MinecraftVersionMeta.Download clientDownload = versionInfo.download(MANIFEST_CLIENT_MAPPINGS);
-		final MinecraftVersionMeta.Download serverDownload = versionInfo.download(MANIFEST_SERVER_MAPPINGS);
+		final CosmicReachVersionMeta versionInfo = context.minecraftProvider().getVersionInfo();
+		final CosmicReachVersionMeta.Download clientDownload = versionInfo.download(MANIFEST_CLIENT_MAPPINGS);
+		final CosmicReachVersionMeta.Download serverDownload = versionInfo.download(MANIFEST_SERVER_MAPPINGS);
 
 		if (clientDownload == null) {
 			throw new RuntimeException("Failed to find official mojang mappings for " + context.minecraftVersion());

@@ -35,8 +35,8 @@ import org.gradle.api.tasks.TaskProvider;
 
 import net.fabricmc.loom.LoomGradleExtension;
 import net.fabricmc.loom.configuration.ide.RunConfigSettings;
-import net.fabricmc.loom.configuration.providers.minecraft.MinecraftJarConfiguration;
-import net.fabricmc.loom.configuration.providers.minecraft.MinecraftVersionMeta;
+import net.fabricmc.loom.configuration.providers.cosmicreach.CosmicReachJarConfiguration;
+import net.fabricmc.loom.configuration.providers.cosmicreach.CosmicReachVersionMeta;
 import net.fabricmc.loom.task.launch.GenerateDLIConfigTask;
 import net.fabricmc.loom.task.launch.GenerateLog4jConfigTask;
 import net.fabricmc.loom.task.launch.GenerateRemapClasspathTask;
@@ -79,7 +79,7 @@ public abstract class LoomTasks implements Runnable {
 			task.dependsOn(getTasks().named("generateRemapClasspath"));
 
 			task.setDescription("Setup the required files to launch Minecraft");
-			task.setGroup(Constants.TaskGroup.FABRIC);
+			task.setGroup(Constants.TaskGroup.PUZZLE);
 		});
 
 		TaskProvider<ValidateAccessWidenerTask> validateAccessWidener = getTasks().register("validateAccessWidener", ValidateAccessWidenerTask.class, t -> {
@@ -96,12 +96,12 @@ public abstract class LoomTasks implements Runnable {
 		GradleUtils.afterSuccessfulEvaluation(getProject(), () -> {
 			LoomGradleExtension extension = LoomGradleExtension.get(getProject());
 
-			if (extension.getMinecraftJarConfiguration().get() == MinecraftJarConfiguration.SERVER_ONLY) {
+			if (extension.getMinecraftJarConfiguration().get() == CosmicReachJarConfiguration.SERVER_ONLY) {
 				// Server only, nothing more to do.
 				return;
 			}
 
-			final MinecraftVersionMeta versionInfo = extension.getMinecraftProvider().getVersionInfo();
+			final CosmicReachVersionMeta versionInfo = extension.getCosmicReachProvider().getVersionInfo();
 
 			if (versionInfo == null) {
 				// Something has gone wrong, don't register the task.
@@ -158,8 +158,8 @@ public abstract class LoomTasks implements Runnable {
 		GradleUtils.afterSuccessfulEvaluation(getProject(), () -> {
 			String taskName;
 
-			boolean serverOnly = extension.getMinecraftJarConfiguration().get() == MinecraftJarConfiguration.SERVER_ONLY;
-			boolean clientOnly = extension.getMinecraftJarConfiguration().get() == MinecraftJarConfiguration.CLIENT_ONLY;
+			boolean serverOnly = extension.getMinecraftJarConfiguration().get() == CosmicReachJarConfiguration.SERVER_ONLY;
+			boolean clientOnly = extension.getMinecraftJarConfiguration().get() == CosmicReachJarConfiguration.CLIENT_ONLY;
 
 			if (serverOnly) {
 				// Server only, remove the client run config
@@ -176,10 +176,6 @@ public abstract class LoomTasks implements Runnable {
 	}
 
 	private static void registerClientSetupTasks(TaskContainer tasks, boolean extractNatives) {
-		tasks.register("downloadAssets", DownloadAssetsTask.class, t -> {
-			t.setDescription("Downloads required game assets for Minecraft.");
-		});
-
 		if (extractNatives) {
 			tasks.register("extractNatives", ExtractNativesTask.class, t -> {
 				t.setDescription("Extracts the Minecraft platform specific natives.");
@@ -187,22 +183,21 @@ public abstract class LoomTasks implements Runnable {
 		}
 
 		tasks.register("configureClientLaunch", task -> {
-			task.dependsOn(tasks.named("downloadAssets"));
 			task.dependsOn(tasks.named("configureLaunch"));
 
-			if (extractNatives) {
-				task.dependsOn(tasks.named("extractNatives"));
-			}
+//			if (extractNatives) {
+//				task.dependsOn(tasks.named("extractNatives"));
+//			}
 
 			task.setDescription("Setup the required files to launch the Minecraft client");
-			task.setGroup(Constants.TaskGroup.FABRIC);
+			task.setGroup(Constants.TaskGroup.PUZZLE);
 		});
 	}
 
 	public static Provider<Task> getIDELaunchConfigureTaskName(Project project) {
 		return project.provider(() -> {
-			final MinecraftJarConfiguration jarConfiguration = LoomGradleExtension.get(project).getMinecraftJarConfiguration().get();
-			final String name = jarConfiguration == MinecraftJarConfiguration.SERVER_ONLY ? "configureLaunch" : "configureClientLaunch";
+			final CosmicReachJarConfiguration jarConfiguration = LoomGradleExtension.get(project).getMinecraftJarConfiguration().get();
+			final String name = jarConfiguration == CosmicReachJarConfiguration.SERVER_ONLY ? "configureLaunch" : "configureClientLaunch";
 			return project.getTasks().getByName(name);
 		});
 	}

@@ -59,7 +59,7 @@ import net.fabricmc.loom.configuration.InstallerData;
 import net.fabricmc.loom.configuration.ide.idea.IdeaSyncTask;
 import net.fabricmc.loom.configuration.ide.idea.IdeaUtils;
 import net.fabricmc.loom.configuration.providers.BundleMetadata;
-import net.fabricmc.loom.configuration.providers.minecraft.library.LibraryContext;
+import net.fabricmc.loom.configuration.providers.cosmicreach.library.LibraryContext;
 import net.fabricmc.loom.util.Constants;
 import net.fabricmc.loom.util.gradle.SourceSetReference;
 
@@ -125,7 +125,7 @@ public class RunConfig {
 
 	public static RunConfig runConfig(Project project, RunConfigSettings settings) {
 		LoomGradleExtension extension = LoomGradleExtension.get(project);
-		LibraryContext context = new LibraryContext(extension.getMinecraftProvider().getVersionInfo(), JavaVersion.current());
+		LibraryContext context = new LibraryContext(extension.getCosmicReachProvider().getVersionInfo(), JavaVersion.current());
 
 		if (settings.getEnvironment().equals("client") && context.usesLWJGL3()) {
 			settings.startFirstThread();
@@ -288,15 +288,15 @@ public class RunConfig {
 			return Collections.emptyList();
 		}
 
-		final BundleMetadata bundleMetadata = LoomGradleExtension.get(project).getMinecraftProvider().getServerBundleMetadata();
+		final BundleMetadata bundleMetadata = LoomGradleExtension.get(project).getCosmicReachProvider().getServerBundleMetadata();
 
 		if (bundleMetadata == null) {
 			// Legacy version
 			return Collections.emptyList();
 		}
 
-		final Set<ResolvedArtifact> clientLibraries = getArtifacts(project, Constants.Configurations.MINECRAFT_CLIENT_RUNTIME_LIBRARIES);
-		final Set<ResolvedArtifact> serverLibraries = getArtifacts(project, Constants.Configurations.MINECRAFT_SERVER_RUNTIME_LIBRARIES);
+		final Set<ResolvedArtifact> clientLibraries = getArtifacts(project, Constants.Configurations.COSMICREACH_CLIENT_RUNTIME_LIBRARIES);
+		final Set<ResolvedArtifact> serverLibraries = getArtifacts(project, Constants.Configurations.COSMICREACH_SERVER_RUNTIME_LIBRARIES);
 		final List<String> clientOnlyLibraries = new LinkedList<>();
 
 		for (ResolvedArtifact library : clientLibraries) {

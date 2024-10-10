@@ -28,15 +28,15 @@ import net.fabricmc.loom.LoomGradleExtension;
 import net.fabricmc.loom.api.mappings.layered.MappingsNamespace;
 import net.fabricmc.loom.api.processor.ProcessorContext;
 import net.fabricmc.loom.configuration.ConfigContext;
-import net.fabricmc.loom.configuration.providers.minecraft.MinecraftJar;
-import net.fabricmc.loom.configuration.providers.minecraft.MinecraftJarConfiguration;
+import net.fabricmc.loom.configuration.providers.cosmicreach.CosmicReachJar;
+import net.fabricmc.loom.configuration.providers.cosmicreach.CosmicReachJarConfiguration;
 import net.fabricmc.loom.util.LazyCloseable;
 import net.fabricmc.mappingio.tree.MemoryMappingTree;
 import net.fabricmc.tinyremapper.TinyRemapper;
 
-public record ProcessorContextImpl(ConfigContext configContext, MinecraftJar minecraftJar) implements ProcessorContext {
+public record ProcessorContextImpl(ConfigContext configContext, CosmicReachJar minecraftJar) implements ProcessorContext {
 	@Override
-	public MinecraftJarConfiguration getJarConfiguration() {
+	public CosmicReachJarConfiguration getJarConfiguration() {
 		return configContext.extension().getMinecraftJarConfiguration().get();
 	}
 

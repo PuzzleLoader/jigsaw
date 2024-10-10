@@ -79,8 +79,8 @@ import org.jetbrains.annotations.Nullable;
 import net.fabricmc.loom.api.decompilers.DecompilationMetadata;
 import net.fabricmc.loom.api.decompilers.DecompilerOptions;
 import net.fabricmc.loom.api.decompilers.LoomDecompiler;
-import net.fabricmc.loom.configuration.providers.minecraft.MinecraftJar;
-import net.fabricmc.loom.configuration.providers.minecraft.mapped.AbstractMappedMinecraftProvider;
+import net.fabricmc.loom.configuration.providers.cosmicreach.CosmicReachJar;
+import net.fabricmc.loom.configuration.providers.cosmicreach.mapped.AbstractMappedCosmicReachProvider;
 import net.fabricmc.loom.decompilers.ClassLineNumbers;
 import net.fabricmc.loom.decompilers.LineNumberRemapper;
 import net.fabricmc.loom.decompilers.cache.CachedData;
@@ -108,7 +108,7 @@ public abstract class GenerateSourcesTask extends AbstractLoomTask {
 	private final DecompilerOptions decompilerOptions;
 
 	/**
-	 * The jar name to decompile, {@link MinecraftJar#getName()}.
+	 * The jar name to decompile, {@link CosmicReachJar#getName()}.
 	 */
 	@Input
 	public abstract Property<String> getInputJarName();
@@ -196,11 +196,11 @@ public abstract class GenerateSourcesTask extends AbstractLoomTask {
 		this.decompilerOptions = decompilerOptions;
 
 		getClassesInputJar().setFrom(getInputJarName().map(minecraftJarName -> {
-			final List<MinecraftJar> minecraftJars = getExtension().getNamedMinecraftProvider().getMinecraftJars();
+			final List<CosmicReachJar> minecraftJars = getExtension().getNamedCosmicReachProvider().getMinecraftJars();
 
-			for (MinecraftJar minecraftJar : minecraftJars) {
+			for (CosmicReachJar minecraftJar : minecraftJars) {
 				if (minecraftJar.getName().equals(minecraftJarName)) {
-					final Path backupJarPath = AbstractMappedMinecraftProvider.getBackupJarPath(minecraftJar);
+					final Path backupJarPath = AbstractMappedCosmicReachProvider.getBackupJarPath(minecraftJar);
 
 					if (Files.notExists(backupJarPath)) {
 						throw new IllegalStateException("Input minecraft jar not found at: " + backupJarPath);
@@ -213,9 +213,9 @@ public abstract class GenerateSourcesTask extends AbstractLoomTask {
 			throw new IllegalStateException("Input minecraft jar not found: " + getInputJarName().get());
 		}));
 		getClassesOutputJar().setFrom(getInputJarName().map(minecraftJarName -> {
-			final List<MinecraftJar> minecraftJars = getExtension().getNamedMinecraftProvider().getMinecraftJars();
+			final List<CosmicReachJar> minecraftJars = getExtension().getNamedCosmicReachProvider().getMinecraftJars();
 
-			for (MinecraftJar minecraftJar : minecraftJars) {
+			for (CosmicReachJar minecraftJar : minecraftJars) {
 				if (minecraftJar.getName().equals(minecraftJarName)) {
 					return minecraftJar.toFile();
 				}
@@ -228,7 +228,7 @@ public abstract class GenerateSourcesTask extends AbstractLoomTask {
 		getClasspath().from(decompilerOptions.getClasspath()).finalizeValueOnRead();
 		dependsOn(decompilerOptions.getClasspath().getBuiltBy());
 
-		getMinecraftCompileLibraries().from(getProject().getConfigurations().getByName(Constants.Configurations.MINECRAFT_COMPILE_LIBRARIES));
+		getMinecraftCompileLibraries().from(getProject().getConfigurations().getByName(Constants.Configurations.COSMICREACH_COMPILE_LIBRARIES));
 		getDecompileCacheFile().set(getExtension().getFiles().getDecompileCache(CACHE_VERSION));
 		getUnpickRuntimeClasspath().from(getProject().getConfigurations().getByName(Constants.Configurations.UNPICK_CLASSPATH));
 		getUnpickLogConfig().set(getExtension().getFiles().getUnpickLoggingConfigFile());

@@ -30,26 +30,26 @@ import java.util.List;
 import org.gradle.api.Project;
 
 import net.fabricmc.loom.LoomGradleExtension;
-import net.fabricmc.loom.configuration.providers.minecraft.MinecraftJar;
-import net.fabricmc.loom.configuration.providers.minecraft.mapped.MappedMinecraftProvider;
+import net.fabricmc.loom.configuration.providers.cosmicreach.CosmicReachJar;
+import net.fabricmc.loom.configuration.providers.cosmicreach.mapped.MappedCosmicReachProvider;
 import net.fabricmc.loom.task.GenerateSourcesTask;
 import net.fabricmc.loom.util.Constants;
 
-public class SingleJarDecompileConfiguration extends DecompileConfiguration<MappedMinecraftProvider> {
-	public SingleJarDecompileConfiguration(Project project, MappedMinecraftProvider minecraftProvider) {
+public class SingleJarDecompileConfiguration extends DecompileConfiguration<MappedCosmicReachProvider> {
+	public SingleJarDecompileConfiguration(Project project, MappedCosmicReachProvider minecraftProvider) {
 		super(project, minecraftProvider);
 	}
 
 	@Override
-	public String getTaskName(MinecraftJar.Type type) {
+	public String getTaskName(CosmicReachJar.Type type) {
 		return "genSources";
 	}
 
 	@Override
 	public final void afterEvaluation() {
-		final List<MinecraftJar> minecraftJars = minecraftProvider.getMinecraftJars();
+		final List<CosmicReachJar> minecraftJars = minecraftProvider.getMinecraftJars();
 		assert minecraftJars.size() == 1;
-		final MinecraftJar minecraftJar = minecraftJars.get(0);
+		final CosmicReachJar minecraftJar = minecraftJars.get(0);
 		final String taskBaseName = getTaskName(minecraftJar.getType());
 
 		LoomGradleExtension.get(project).getDecompilerOptions().forEach(options -> {
@@ -62,7 +62,7 @@ public class SingleJarDecompileConfiguration extends DecompileConfiguration<Mapp
 
 				task.dependsOn(project.getTasks().named("validateAccessWidener"));
 				task.setDescription("Decompile minecraft using %s.".formatted(decompilerName));
-				task.setGroup(Constants.TaskGroup.FABRIC);
+				task.setGroup(Constants.TaskGroup.PUZZLE);
 
 				if (mappingConfiguration.hasUnpickDefinitions()) {
 					final File outputJar = new File(extension.getMappingConfiguration().mappingsWorkingDir().toFile(), "minecraft-unpicked.jar");
@@ -73,7 +73,7 @@ public class SingleJarDecompileConfiguration extends DecompileConfiguration<Mapp
 
 		project.getTasks().register(taskBaseName, task -> {
 			task.setDescription("Decompile minecraft using the default decompiler.");
-			task.setGroup(Constants.TaskGroup.FABRIC);
+			task.setGroup(Constants.TaskGroup.PUZZLE);
 
 			task.dependsOn(project.getTasks().named("genSourcesWith" + DecompileConfiguration.DEFAULT_DECOMPILER));
 		});
