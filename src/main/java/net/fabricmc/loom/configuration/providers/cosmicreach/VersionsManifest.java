@@ -31,7 +31,21 @@ import org.jetbrains.annotations.Nullable;
 
 public record VersionsManifest(List<Version> versions, Map<String, String> latest) {
 	public static class Version {
-		public String id, url, sha1;
+		public String id, type;
+		public int releaseTime;
+
+		public Client client;
+		public Server server;
+	}
+
+	public static class Client {
+		public String url, sha256;
+		public int size;
+	}
+
+	public static class Server {
+		public String url, sha256;
+		public int size;
 	}
 
 	@Nullable

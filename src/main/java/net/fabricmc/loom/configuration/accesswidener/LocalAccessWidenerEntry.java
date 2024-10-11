@@ -48,7 +48,7 @@ public record LocalAccessWidenerEntry(Path path, String hash) implements AccessW
 	}
 
 	@Override
-	public void read(AccessWidenerVisitor visitor, LazyCloseable<TinyRemapper> remapper) throws IOException {
+	public void read(AccessWidenerVisitor visitor) throws IOException {
 		var reader = new AccessWidenerReader(visitor);
 		reader.read(Files.readAllBytes(path));
 	}
@@ -56,11 +56,6 @@ public record LocalAccessWidenerEntry(Path path, String hash) implements AccessW
 	@Override
 	public ModEnvironment environment() {
 		return ModEnvironment.UNIVERSAL;
-	}
-
-	@Override
-	public @Nullable String mappingId() {
-		return null;
 	}
 
 	@Override

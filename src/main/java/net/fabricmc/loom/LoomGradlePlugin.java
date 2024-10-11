@@ -45,7 +45,6 @@ import net.fabricmc.loom.decompilers.DecompilerConfiguration;
 import net.fabricmc.loom.extension.LoomFiles;
 import net.fabricmc.loom.extension.LoomGradleExtensionImpl;
 import net.fabricmc.loom.task.LoomTasks;
-import net.fabricmc.loom.task.RemapTaskConfiguration;
 import net.fabricmc.loom.util.LibraryLocationLogger;
 
 public class LoomGradlePlugin implements BootstrappedPlugin {
@@ -59,7 +58,6 @@ public class LoomGradlePlugin implements BootstrappedPlugin {
 			LoomConfigurations.class,
 			CompileConfiguration.class,
 			MavenPublication.class,
-			RemapTaskConfiguration.class,
 			LoomTasks.class,
 			DecompilerConfiguration.class,
 			IdeaConfiguration.class,

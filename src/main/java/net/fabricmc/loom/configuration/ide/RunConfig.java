@@ -125,9 +125,8 @@ public class RunConfig {
 
 	public static RunConfig runConfig(Project project, RunConfigSettings settings) {
 		LoomGradleExtension extension = LoomGradleExtension.get(project);
-		LibraryContext context = new LibraryContext(extension.getCosmicReachProvider().getVersionInfo(), JavaVersion.current());
 
-		if (settings.getEnvironment().equals("client") && context.usesLWJGL3()) {
+		if (settings.getEnvironment().equals("client")) {
 			settings.startFirstThread();
 		}
 
@@ -155,7 +154,7 @@ public class RunConfig {
 				configName += capitalizeCamelCaseName(srcName) + " ";
 			}
 
-			configName += "Minecraft " + capitalizeCamelCaseName(name);
+			configName += "CosmicReach " + capitalizeCamelCaseName(name);
 		}
 
 		Objects.requireNonNull(environment, "No environment set for run config");

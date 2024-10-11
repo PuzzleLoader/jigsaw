@@ -55,7 +55,7 @@ public interface MixinExtension extends MixinExtensionAPI {
 	 * for configuring the mixin annotation processor. It's stored
 	 * in [SourceSet].ext.mixin.
 	 */
-	record MixinInformationContainer(SourceSet sourceSet, Provider<String> refmapNameProvider, PatternSet mixinConfigPattern) { }
+	record MixinInformationContainer(SourceSet sourceSet, PatternSet mixinConfigPattern) { }
 
 	@Nullable
 	static MixinInformationContainer getMixinInformationContainer(SourceSet sourceSet) {

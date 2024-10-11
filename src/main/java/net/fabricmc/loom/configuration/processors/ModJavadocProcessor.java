@@ -43,7 +43,6 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.fabricmc.loom.api.mappings.layered.MappingsNamespace;
 import net.fabricmc.loom.api.processor.MinecraftJarProcessor;
 import net.fabricmc.loom.api.processor.ProcessorContext;
 import net.fabricmc.loom.api.processor.SpecContext;
@@ -97,17 +96,6 @@ public abstract class ModJavadocProcessor implements MinecraftJarProcessor<ModJa
 		// Nothing to do for the jar
 	}
 
-	@Override
-	public @Nullable MappingsProcessor<Spec> processMappings() {
-		return (mappings, spec, context) -> {
-			for (ModJavadoc javadoc : spec.javadocs()) {
-				javadoc.apply(mappings);
-			}
-
-			return true;
-		};
-	}
-
 	public record ModJavadoc(String modId, MemoryMappingTree mappingTree, String mappingsHash) {
 		@Nullable
 		public static ModJavadoc create(FabricModJson fabricModJson) {
@@ -131,14 +119,6 @@ public abstract class ModJavadocProcessor implements MinecraftJarProcessor<ModJa
 				}
 			} catch (IOException e) {
 				throw new UncheckedIOException("Failed to read javadoc from mod: " + modId, e);
-			}
-
-			if (!mappings.getSrcNamespace().equals(MappingsNamespace.INTERMEDIARY.toString())) {
-				throw new IllegalStateException("Javadoc provided by mod (%s) must be have an intermediary source namespace".formatted(modId));
-			}
-
-			if (!mappings.getDstNamespaces().isEmpty()) {
-				throw new IllegalStateException("Javadoc provided by mod (%s) must not contain any dst names".formatted(modId));
 			}
 
 			return new ModJavadoc(modId, mappings, mappingsHash);

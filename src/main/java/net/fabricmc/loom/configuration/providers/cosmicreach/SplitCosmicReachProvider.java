@@ -28,7 +28,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-import net.fabricmc.loom.api.mappings.layered.MappingsNamespace;
 import net.fabricmc.loom.configuration.ConfigContext;
 import net.fabricmc.loom.configuration.providers.BundleMetadata;
 
@@ -51,11 +50,6 @@ public final class SplitCosmicReachProvider extends CosmicReachProvider {
 	@Override
 	public List<Path> getCosmicReachJars() {
 		return List.of(cosmicReachClientOnlyJar, cosmicReachCommonJar);
-	}
-
-	@Override
-	public MappingsNamespace getOfficialNamespace() {
-		return MappingsNamespace.OFFICIAL;
 	}
 
 	@Override

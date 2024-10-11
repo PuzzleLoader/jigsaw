@@ -35,6 +35,11 @@ import java.util.Map;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
+import net.fabricmc.loom.configuration.providers.cosmicreach.CosmicReachProvider;
+
+import net.fabricmc.loom.configuration.providers.cosmicreach.FinalizedCosmicReachProvider;
+import net.fabricmc.loom.configuration.providers.cosmicreach.SplitCosmicReachProvider;
+
 import org.apache.commons.io.FileUtils;
 import org.gradle.api.Project;
 import org.gradle.api.file.RegularFileProperty;
@@ -49,7 +54,6 @@ import org.gradle.api.tasks.TaskAction;
 import net.fabricmc.loom.LoomGradleExtension;
 import net.fabricmc.loom.LoomGradlePlugin;
 import net.fabricmc.loom.configuration.providers.cosmicreach.CosmicReachVersionMeta;
-import net.fabricmc.loom.configuration.providers.cosmicreach.mapped.MappedCosmicReachProvider;
 import net.fabricmc.loom.task.AbstractLoomTask;
 import net.fabricmc.loom.util.gradle.SourceSetHelper;
 
@@ -84,21 +88,12 @@ public abstract class GenerateDLIConfigTask extends AbstractLoomTask {
 	@Optional
 	protected abstract Property<String> getCommonGameJarPath();
 
-	@Input
-	protected abstract Property<String> getAssetsDirectoryPath();
-
-	@Input
-	protected abstract Property<String> getNativesDirectoryPath();
-
-	@InputFile
-	public abstract RegularFileProperty getRemapClasspathFile();
-
 	@OutputFile
 	protected abstract RegularFileProperty getDevLauncherConfig();
 
 	public GenerateDLIConfigTask() {
 		getVersionInfoJson().set(LoomGradlePlugin.GSON.toJson(getExtension().getCosmicReachProvider().getVersionInfo()));
-		getMinecraftVersion().set(getExtension().getCosmicReachProvider().minecraftVersion());
+		getMinecraftVersion().set(getExtension().getCosmicReachProvider().cosmicReachVersion());
 		getSplitSourceSets().set(getExtension().areEnvironmentSourceSetsSplit());
 		getANSISupportedIDE().set(ansiSupportedIde(getProject()));
 		getPlainConsole().set(getProject().getGradle().getStartParameter().getConsoleOutput() == ConsoleOutput.Plain);
@@ -114,38 +109,17 @@ public abstract class GenerateDLIConfigTask extends AbstractLoomTask {
 			getCommonGameJarPath().set(getGameJarPath("common"));
 		}
 
-		getAssetsDirectoryPath().set(new File(getExtension().getFiles().getUserCache(), "assets").getAbsolutePath());
-		getNativesDirectoryPath().set(getExtension().getFiles().getNativesDirectory(getProject()).getAbsolutePath());
 		getDevLauncherConfig().set(getExtension().getFiles().getDevLauncherConfig());
 	}
 
 	@TaskAction
 	public void run() throws IOException {
 		final CosmicReachVersionMeta versionInfo = LoomGradlePlugin.GSON.fromJson(getVersionInfoJson().get(), CosmicReachVersionMeta.class);
-		File assetsDirectory = new File(getAssetsDirectoryPath().get());
-
-		if (versionInfo.assets().equals("legacy")) {
-			assetsDirectory = new File(assetsDirectory, "/legacy/" + versionInfo.id());
-		}
 
 		final LaunchConfig launchConfig = new LaunchConfig()
 				.property("fabric.development", "true")
-				.property("fabric.remapClasspathFile", getRemapClasspathFile().get().getAsFile().getAbsolutePath())
 				.property("log4j.configurationFile", getLog4jConfigPaths().get())
-				.property("log4j2.formatMsgNoLookups", "true")
-
-				.argument("client", "--assetIndex")
-				.argument("client", versionInfo.assetIndex().fabricId(getMinecraftVersion().get()))
-				.argument("client", "--assetsDir")
-				.argument("client", assetsDirectory.getAbsolutePath());
-
-		if (versionInfo.hasNativesToExtract()) {
-			String nativesPath = getNativesDirectoryPath().get();
-
-			launchConfig
-					.property("client", "java.library.path", nativesPath)
-					.property("client", "org.lwjgl.librarypath", nativesPath);
-		}
+				.property("log4j2.formatMsgNoLookups", "true");
 
 		if (getSplitSourceSets().get()) {
 			launchConfig.property("client", "fabric.gameJarPath.client", getClientGameJarPath().get());
@@ -171,7 +145,7 @@ public abstract class GenerateDLIConfigTask extends AbstractLoomTask {
 	}
 
 	private String getGameJarPath(String env) {
-		MappedCosmicReachProvider.Split split = (MappedCosmicReachProvider.Split) getExtension().getNamedCosmicReachProvider();
+		FinalizedCosmicReachProvider.Split split = (FinalizedCosmicReachProvider.Split) getExtension().getFinalizedCosmicReachProvider();
 
 		return switch (env) {
 		case "client" -> split.getClientOnlyJar().getPath().toAbsolutePath().toString();

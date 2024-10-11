@@ -54,24 +54,13 @@ import net.fabricmc.loom.api.MixinExtensionAPI;
 import net.fabricmc.loom.api.ModSettings;
 import net.fabricmc.loom.api.RemapConfigurationSettings;
 import net.fabricmc.loom.api.decompilers.DecompilerOptions;
-import net.fabricmc.loom.api.mappings.intermediate.IntermediateMappingsProvider;
-import net.fabricmc.loom.api.mappings.layered.MappingsNamespace;
-import net.fabricmc.loom.api.mappings.layered.spec.LayeredMappingSpecBuilder;
 import net.fabricmc.loom.api.processor.MinecraftJarProcessor;
-import net.fabricmc.loom.api.remapping.RemapperExtension;
-import net.fabricmc.loom.api.remapping.RemapperParameters;
-import net.fabricmc.loom.configuration.RemapConfigurations;
 import net.fabricmc.loom.configuration.ide.RunConfigSettings;
 import net.fabricmc.loom.configuration.processors.JarProcessor;
-import net.fabricmc.loom.configuration.providers.mappings.LayeredMappingSpec;
-import net.fabricmc.loom.configuration.providers.mappings.LayeredMappingSpecBuilderImpl;
-import net.fabricmc.loom.configuration.providers.mappings.LayeredMappingsFactory;
 import net.fabricmc.loom.configuration.providers.cosmicreach.ManifestLocations;
 import net.fabricmc.loom.configuration.providers.cosmicreach.CosmicReachJarConfiguration;
 import net.fabricmc.loom.configuration.providers.cosmicreach.CosmicReachMetadataProvider;
 import net.fabricmc.loom.configuration.providers.cosmicreach.CosmicReachSourceSets;
-import net.fabricmc.loom.task.GenerateSourcesTask;
-import net.fabricmc.loom.util.Constants;
 import net.fabricmc.loom.util.DeprecationHelper;
 import net.fabricmc.loom.util.MirrorUtil;
 import net.fabricmc.loom.util.fmj.FabricModJson;
@@ -93,10 +82,9 @@ public abstract class LoomGradleExtensionApiImpl implements LoomGradleExtensionA
 	protected final Property<Boolean> transitiveAccessWideners;
 	protected final Property<Boolean> modProvidedJavadoc;
 	protected final Property<String> intermediary;
-	protected final Property<IntermediateMappingsProvider> intermediateMappingsProvider;
 	private final Property<Boolean> runtimeOnlyLog4j;
 	private final Property<Boolean> splitModDependencies;
-	private final Property<CosmicReachJarConfiguration<?, ?, ?>> minecraftJarConfiguration;
+	private final Property<CosmicReachJarConfiguration<?, ?>> minecraftJarConfiguration;
 	private final Property<Boolean> splitEnvironmentalSourceSet;
 	private final InterfaceInjectionExtensionAPI interfaceInjectionExtension;
 
@@ -105,14 +93,12 @@ public abstract class LoomGradleExtensionApiImpl implements LoomGradleExtensionA
 	private final NamedDomainObjectContainer<ModSettings> mods;
 	private final NamedDomainObjectList<RemapConfigurationSettings> remapConfigurations;
 	private final ListProperty<MinecraftJarProcessor<?>> minecraftJarProcessors;
-	protected final ListProperty<RemapperExtensionHolder> remapperExtensions;
 
 	// A common mistake with layered mappings is to call the wrong `officialMojangMappings` method, use this to keep track of when we are building a layered mapping spec.
 	protected final ThreadLocal<Boolean> layeredSpecBuilderScope = ThreadLocal.withInitial(() -> false);
 	public static final String DEFAULT_INTERMEDIARY_URL = "https://maven.fabricmc.net/net/fabricmc/intermediary/%1$s/intermediary-%1$s-v2.jar";
 
 	protected boolean hasEvaluatedLayeredMappings = false;
-	protected final Map<LayeredMappingSpec, LayeredMappingsFactory> layeredMappingsDependencyMap = new HashMap<>();
 
 	protected LoomGradleExtensionApiImpl(Project project, LoomFiles directories) {
 		this.jarProcessors = project.getObjects().listProperty(JarProcessor.class)
@@ -121,7 +107,7 @@ public abstract class LoomGradleExtensionApiImpl implements LoomGradleExtensionA
 		this.accessWidener = project.getObjects().fileProperty();
 		this.versionsManifests = new ManifestLocations();
 		this.versionsManifests.add("mojang", MirrorUtil.getVersionManifests(project), -2);
-		this.versionsManifests.add("fabric_experimental", MirrorUtil.getExperimentalVersions(project), -1);
+//		this.versionsManifests.add("fabric_experimental", MirrorUtil.getExperimentalVersions(project), -1);
 		this.customMetadata = project.getObjects().property(String.class);
 		this.knownIndyBsms = project.getObjects().setProperty(String.class).convention(Set.of(
 				"java/lang/invoke/StringConcatFactory",
@@ -138,9 +124,6 @@ public abstract class LoomGradleExtensionApiImpl implements LoomGradleExtensionA
 		this.intermediary = project.getObjects().property(String.class)
 				.convention(DEFAULT_INTERMEDIARY_URL);
 
-		this.intermediateMappingsProvider = project.getObjects().property(IntermediateMappingsProvider.class);
-		this.intermediateMappingsProvider.finalizeValueOnRead();
-
 		this.deprecationHelper = new DeprecationHelper.ProjectBased(project);
 
 		this.runConfigs = project.container(RunConfigSettings.class,
@@ -153,20 +136,20 @@ public abstract class LoomGradleExtensionApiImpl implements LoomGradleExtensionA
 		this.minecraftJarProcessors.finalizeValueOnRead();
 
 		//noinspection unchecked
-		this.minecraftJarConfiguration = project.getObjects().property((Class<CosmicReachJarConfiguration<?, ?, ?>>) (Class<?>) CosmicReachJarConfiguration.class)
+		this.minecraftJarConfiguration = project.getObjects().property((Class<CosmicReachJarConfiguration<?, ?>>) (Class<?>) CosmicReachJarConfiguration.class)
 				.convention(project.provider(() -> {
 					final LoomGradleExtension extension = LoomGradleExtension.get(project);
 					final CosmicReachMetadataProvider metadataProvider = extension.getMetadataProvider();
 
 					// if no configuration is selected by the user, attempt to select one
 					// based on the mc version and which sides are present for it
-					if (!metadataProvider.getVersionMeta().downloads().containsKey("server")) {
+					if (metadataProvider.getVersionEntry().server == null) {
 						return CosmicReachJarConfiguration.CLIENT_ONLY;
-					} else if (!metadataProvider.getVersionMeta().downloads().containsKey("client")) {
+					} else if (metadataProvider.getVersionEntry().client == null) {
 						return CosmicReachJarConfiguration.SERVER_ONLY;
-					} else if (metadataProvider.getVersionMeta().isVersionOrNewer(Constants.RELEASE_TIME_1_3)) {
+					} /*else if (metadataProvider.getVersionMeta().isVersionOrNewer(Constants.RELEASE_TIME_1_3)) {
 						return CosmicReachJarConfiguration.MERGED;
-					}/* else {
+					} else {
 						return CosmicReachJarConfiguration.LEGACY_MERGED;
 					}*/
 					return CosmicReachJarConfiguration.MERGED;
@@ -187,9 +170,6 @@ public abstract class LoomGradleExtensionApiImpl implements LoomGradleExtensionA
 
 		this.splitEnvironmentalSourceSet = project.getObjects().property(Boolean.class).convention(false);
 		this.splitEnvironmentalSourceSet.finalizeValueOnRead();
-
-		remapperExtensions = project.getObjects().listProperty(RemapperExtensionHolder.class);
-		remapperExtensions.finalizeValueOnRead();
 
 		// Enable dep iface injection by default
 		interfaceInjection(interfaceInjection -> {
@@ -230,32 +210,6 @@ public abstract class LoomGradleExtensionApiImpl implements LoomGradleExtensionA
 	@Override
 	public void addMinecraftJarProcessor(Class<? extends MinecraftJarProcessor<?>> clazz, Object... parameters) {
 		getMinecraftJarProcessors().add(getProject().getObjects().newInstance(clazz, parameters));
-	}
-
-	@Override
-	public Dependency officialMojangMappings() {
-		if (layeredSpecBuilderScope.get()) {
-			throw new IllegalStateException("Use `officialMojangMappings()` when configuring layered mappings, not the extension method `loom.officialMojangMappings()`");
-		}
-
-		return layered(LayeredMappingSpecBuilder::officialMojangMappings);
-	}
-
-	@Override
-	public Dependency layered(Action<LayeredMappingSpecBuilder> action) {
-		if (hasEvaluatedLayeredMappings) {
-			throw new IllegalStateException("Layered mappings have already been evaluated");
-		}
-
-		LayeredMappingSpecBuilderImpl builder = new LayeredMappingSpecBuilderImpl();
-
-		layeredSpecBuilderScope.set(true);
-		action.execute(builder);
-		layeredSpecBuilderScope.set(false);
-
-		final LayeredMappingSpec builtSpec = builder.build();
-		final LayeredMappingsFactory layeredMappingsFactory = layeredMappingsDependencyMap.computeIfAbsent(builtSpec, LayeredMappingsFactory::new);
-		return layeredMappingsFactory.createDependency(getProject());
 	}
 
 	@Override
@@ -328,51 +282,12 @@ public abstract class LoomGradleExtensionApiImpl implements LoomGradleExtensionA
 	}
 
 	@Override
-	public IntermediateMappingsProvider getIntermediateMappingsProvider() {
-		return intermediateMappingsProvider.get();
-	}
-
-	@Override
-	public void setIntermediateMappingsProvider(IntermediateMappingsProvider intermediateMappingsProvider) {
-		this.intermediateMappingsProvider.set(intermediateMappingsProvider);
-	}
-
-	@Override
-	public <T extends IntermediateMappingsProvider> void setIntermediateMappingsProvider(Class<T> clazz, Action<T> action) {
-		T provider = getProject().getObjects().newInstance(clazz);
-		configureIntermediateMappingsProviderInternal(provider);
-		action.execute(provider);
-		intermediateMappingsProvider.set(provider);
-	}
-
-	@Override
-	public File getMappingsFile() {
-		return LoomGradleExtension.get(getProject()).getMappingConfiguration().tinyMappings.toFile();
-	}
-
-	@Override
-	public GenerateSourcesTask getDecompileTask(DecompilerOptions options, boolean client) {
-		final String decompilerName = options.getFormattedName();
-		final String taskName;
-
-		if (areEnvironmentSourceSetsSplit()) {
-			taskName = "gen%sSourcesWith%s".formatted(client ? "ClientOnly" : "Common", decompilerName);
-		} else {
-			taskName = "genSourcesWith" + decompilerName;
-		}
-
-		return (GenerateSourcesTask) getProject().getTasks().getByName(taskName);
-	}
-
-	protected abstract <T extends IntermediateMappingsProvider> void configureIntermediateMappingsProviderInternal(T provider);
-
-	@Override
 	public void disableDeprecatedPomGeneration(MavenPublication publication) {
 		net.fabricmc.loom.configuration.MavenPublication.excludePublication(publication);
 	}
 
 	@Override
-	public Property<CosmicReachJarConfiguration<?, ?, ?>> getMinecraftJarConfiguration() {
+	public Property<CosmicReachJarConfiguration<?, ?>> getMinecraftJarConfiguration() {
 		return minecraftJarConfiguration;
 	}
 
@@ -420,88 +335,8 @@ public abstract class LoomGradleExtensionApiImpl implements LoomGradleExtensionA
 	}
 
 	@Override
-	public NamedDomainObjectList<RemapConfigurationSettings> getRemapConfigurations() {
-		return remapConfigurations;
-	}
-
-	@Override
-	public RemapConfigurationSettings addRemapConfiguration(String name, Action<RemapConfigurationSettings> action) {
-		final RemapConfigurationSettings configurationSettings = getProject().getObjects().newInstance(RemapConfigurationSettings.class, name);
-
-		// TODO remove in 2.0, this is a fallback to mimic the previous (Broken) behaviour
-		configurationSettings.getSourceSet().convention(SourceSetHelper.getMainSourceSet(getProject()));
-
-		action.execute(configurationSettings);
-		RemapConfigurations.applyToProject(getProject(), configurationSettings);
-		remapConfigurations.add(configurationSettings);
-
-		return configurationSettings;
-	}
-
-	@Override
-	public void createRemapConfigurations(SourceSet sourceSet) {
-		RemapConfigurations.setupForSourceSet(getProject(), sourceSet);
-	}
-
-	@Override
-	public <T extends RemapperParameters> void addRemapperExtension(Class<? extends RemapperExtension<T>> remapperExtensionClass, Class<T> parametersClass, Action<T> parameterAction) {
-		final ObjectFactory objectFactory = getProject().getObjects();
-		final RemapperExtensionHolder holder;
-
-		if (parametersClass != RemapperParameters.None.class) {
-			T parameters = objectFactory.newInstance(parametersClass);
-			parameterAction.execute(parameters);
-			holder = objectFactory.newInstance(RemapperExtensionHolder.class, parameters);
-		} else {
-			holder = objectFactory.newInstance(RemapperExtensionHolder.class, RemapperParameters.None.INSTANCE);
-		}
-
-		holder.getRemapperExtensionClass().set(remapperExtensionClass.getName());
-		remapperExtensions.add(holder);
-	}
-
-	@Override
 	public Provider<String> getMinecraftVersion() {
-		return getProject().provider(() -> LoomGradleExtension.get(getProject()).getCosmicReachProvider().minecraftVersion());
+		return getProject().provider(() -> LoomGradleExtension.get(getProject()).getCosmicReachProvider().cosmicReachVersion());
 	}
 
-	@Override
-	public FileCollection getNamedMinecraftJars() {
-		final ConfigurableFileCollection jars = getProject().getObjects().fileCollection();
-		jars.from(getProject().provider(() -> LoomGradleExtension.get(getProject()).getMinecraftJars(MappingsNamespace.NAMED)));
-		return jars;
-	}
-
-	// This is here to ensure that LoomGradleExtensionApiImpl compiles without any unimplemented methods
-	private final class EnsureCompile extends LoomGradleExtensionApiImpl {
-		private EnsureCompile() {
-			super(null, null);
-			throw new RuntimeException();
-		}
-
-		@Override
-		public DeprecationHelper getDeprecationHelper() {
-			throw new RuntimeException("Yeah... something is really wrong");
-		}
-
-		@Override
-		protected Project getProject() {
-			throw new RuntimeException("Yeah... something is really wrong");
-		}
-
-		@Override
-		protected LoomFiles getFiles() {
-			throw new RuntimeException("Yeah... something is really wrong");
-		}
-
-		@Override
-		protected <T extends IntermediateMappingsProvider> void configureIntermediateMappingsProviderInternal(T provider) {
-			throw new RuntimeException("Yeah... something is really wrong");
-		}
-
-		@Override
-		public MixinExtension getMixin() {
-			throw new RuntimeException("Yeah... something is really wrong");
-		}
-	}
 }

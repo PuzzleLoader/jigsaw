@@ -34,6 +34,8 @@ import java.util.Objects;
 
 import javax.inject.Inject;
 
+import net.fabricmc.loom.configuration.providers.cosmicreach.FinalizedCosmicReachProvider;
+
 import org.gradle.api.Project;
 import org.gradle.api.configuration.BuildFeatures;
 import org.gradle.api.file.ConfigurableFileCollection;
@@ -41,20 +43,12 @@ import org.gradle.api.file.FileCollection;
 import org.gradle.api.provider.ListProperty;
 
 import net.fabricmc.loom.LoomGradleExtension;
-import net.fabricmc.loom.api.mappings.intermediate.IntermediateMappingsProvider;
-import net.fabricmc.loom.api.mappings.layered.MappingsNamespace;
 import net.fabricmc.loom.configuration.InstallerData;
 import net.fabricmc.loom.configuration.LoomDependencyManager;
 import net.fabricmc.loom.configuration.accesswidener.AccessWidenerFile;
-import net.fabricmc.loom.configuration.providers.mappings.IntermediaryMappingsProvider;
-import net.fabricmc.loom.configuration.providers.mappings.LayeredMappingsFactory;
-import net.fabricmc.loom.configuration.providers.mappings.MappingConfiguration;
-import net.fabricmc.loom.configuration.providers.mappings.NoOpIntermediateMappingsProvider;
 import net.fabricmc.loom.configuration.providers.cosmicreach.CosmicReachMetadataProvider;
 import net.fabricmc.loom.configuration.providers.cosmicreach.CosmicReachProvider;
 import net.fabricmc.loom.configuration.providers.cosmicreach.library.LibraryProcessorManager;
-import net.fabricmc.loom.configuration.providers.cosmicreach.mapped.IntermediaryCosmicReachProvider;
-import net.fabricmc.loom.configuration.providers.cosmicreach.mapped.NamedCosmicReachProvider;
 import net.fabricmc.loom.util.download.Download;
 import net.fabricmc.loom.util.download.DownloadBuilder;
 
@@ -69,14 +63,12 @@ public abstract class LoomGradleExtensionImpl extends LoomGradleExtensionApiImpl
 	private LoomDependencyManager dependencyManager;
 	private CosmicReachMetadataProvider metadataProvider;
 	private CosmicReachProvider minecraftProvider;
-	private MappingConfiguration mappingConfiguration;
-	private NamedCosmicReachProvider<?> namedMinecraftProvider;
-	private IntermediaryCosmicReachProvider<?> intermediaryMinecraftProvider;
 	private InstallerData installerData;
 	private boolean refreshDeps;
 	private final ListProperty<LibraryProcessorManager.LibraryProcessorFactory> libraryProcessorFactories;
 	private final boolean configurationCacheActive;
 	private final boolean isolatedProjectsActive;
+	private FinalizedCosmicReachProvider<?> finalizedCosmicReachProvider;
 
 	@Inject
 	protected abstract BuildFeatures getBuildFeatures();
@@ -89,15 +81,6 @@ public abstract class LoomGradleExtensionImpl extends LoomGradleExtensionApiImpl
 		this.mixinApExtension = project.getObjects().newInstance(MixinExtensionImpl.class, project);
 		this.loomFiles = files;
 		this.unmappedMods = project.files();
-
-		// Setup the default intermediate mappings provider.
-		setIntermediateMappingsProvider(IntermediaryMappingsProvider.class, provider -> {
-			provider.getIntermediaryUrl()
-					.convention(getIntermediaryUrl())
-					.finalizeValueOnRead();
-
-			provider.getRefreshDeps().set(project.provider(() -> LoomGradleExtension.get(project).refreshDeps()));
-		});
 
 		refreshDeps = manualRefreshDeps();
 		libraryProcessorFactories = project.getObjects().listProperty(LibraryProcessorManager.LibraryProcessorFactory.class);
@@ -150,50 +133,6 @@ public abstract class LoomGradleExtensionImpl extends LoomGradleExtensionApiImpl
 	@Override
 	public void setMinecraftProvider(CosmicReachProvider minecraftProvider) {
 		this.minecraftProvider = minecraftProvider;
-	}
-
-	@Override
-	public MappingConfiguration getMappingConfiguration() {
-		return Objects.requireNonNull(mappingConfiguration, "Cannot get MappingsProvider before it has been setup");
-	}
-
-	@Override
-	public void setMappingConfiguration(MappingConfiguration mappingConfiguration) {
-		this.mappingConfiguration = mappingConfiguration;
-	}
-
-	@Override
-	public NamedCosmicReachProvider<?> getNamedCosmicReachProvider() {
-		return Objects.requireNonNull(namedMinecraftProvider, "Cannot get NamedMinecraftProvider before it has been setup");
-	}
-
-	@Override
-	public IntermediaryCosmicReachProvider<?> getIntermediaryMinecraftProvider() {
-		return Objects.requireNonNull(intermediaryMinecraftProvider, "Cannot get IntermediaryMinecraftProvider before it has been setup");
-	}
-
-	@Override
-	public void setNamedMinecraftProvider(NamedCosmicReachProvider<?> namedMinecraftProvider) {
-		this.namedMinecraftProvider = namedMinecraftProvider;
-	}
-
-	@Override
-	public void setIntermediaryMinecraftProvider(IntermediaryCosmicReachProvider<?> intermediaryMinecraftProvider) {
-		this.intermediaryMinecraftProvider = intermediaryMinecraftProvider;
-	}
-
-	@Override
-	public void noIntermediateMappings() {
-		setIntermediateMappingsProvider(NoOpIntermediateMappingsProvider.class, p -> { });
-	}
-
-	@Override
-	public FileCollection getMinecraftJarsCollection(MappingsNamespace mappingsNamespace) {
-		return getProject().files(
-			getProject().provider(() ->
-				getProject().files(getMinecraftJars(mappingsNamespace).stream().map(Path::toFile).toList())
-			)
-		);
 	}
 
 	@Override
@@ -271,30 +210,26 @@ public abstract class LoomGradleExtensionImpl extends LoomGradleExtensionApiImpl
 	}
 
 	@Override
-	public ListProperty<RemapperExtensionHolder> getRemapperExtensions() {
-		return remapperExtensions;
-	}
-
-	@Override
-	public Collection<LayeredMappingsFactory> getLayeredMappingFactories() {
-		hasEvaluatedLayeredMappings = true;
-		return Collections.unmodifiableCollection(layeredMappingsDependencyMap.values());
-	}
-
-	@Override
-	protected <T extends IntermediateMappingsProvider> void configureIntermediateMappingsProviderInternal(T provider) {
-		provider.getMinecraftVersion().set(getProject().provider(() -> getCosmicReachProvider().minecraftVersion()));
-		provider.getMinecraftVersion().disallowChanges();
-
-		provider.getDownloader().set(this::download);
-		provider.getDownloader().disallowChanges();
-
-		provider.getIsLegacyMinecraft().set(getProject().provider(() -> false));
-		provider.getIsLegacyMinecraft().disallowChanges();
-	}
-
-	@Override
 	public boolean isConfigurationCacheActive() {
 		return configurationCacheActive;
 	}
+
+	@Override
+	public FileCollection getMinecraftJarsCollection() {
+		return getProject().files(
+				getProject().provider(() ->
+						getProject().files(getMinecraftJars().stream().map(Path::toFile).toList())
+				)
+		);
+	}
+
+	public void setFinalizedCosmicReachProvider(FinalizedCosmicReachProvider<?> finalizedCosmicReachProvider) {
+		this.finalizedCosmicReachProvider = finalizedCosmicReachProvider;
+	}
+
+	@Override
+	public FinalizedCosmicReachProvider<?> getFinalizedCosmicReachProvider() {
+		return Objects.requireNonNull(finalizedCosmicReachProvider, "Cannot get FinalizedCosmicReachProvider before it has been setup");
+	}
+
 }

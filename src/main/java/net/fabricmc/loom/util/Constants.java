@@ -32,7 +32,6 @@ public class Constants {
 	public static final String RESOURCES_BASE = "https://resources.download.minecraft.net/";
 //	public static final String VERSION_MANIFESTS = "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json";
 	public static final String VERSION_MANIFESTS = "https://raw.githubusercontent.com/CRModders/CosmicArchive/refs/heads/main/versions.json";
-	public static final String EXPERIMENTAL_VERSIONS = "https://maven.fabricmc.net/net/minecraft/experimental_versions.json";
 	public static final String FABRIC_REPOSITORY = "https://maven.fabricmc.net/";
 
 	public static final int ASM_VERSION = Opcodes.ASM9;
@@ -101,15 +100,15 @@ public class Constants {
 	}
 
 	public static final class Knot {
-		public static final String KNOT_CLIENT = "net.fabricmc.loader.launch.knot.KnotClient";
-		public static final String KNOT_SERVER = "net.fabricmc.loader.launch.knot.KnotServer";
+		public static final String KNOT_CLIENT = "com.github.puzzle.core.loader.launch.pieces.ClientPiece";
+		public static final String KNOT_SERVER = "com.github.puzzle.core.loader.launch.pieces.ServerPiece";
 
 		private Knot() {
 		}
 	}
 
 	public static final class TaskGroup {
-		public static final String PUZZLE = "fabric";
+		public static final String PUZZLE = "puzzle";
 		public static final String IDE = "ide";
 
 		private TaskGroup() {

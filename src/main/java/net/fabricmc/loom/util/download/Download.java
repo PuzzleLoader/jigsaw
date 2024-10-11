@@ -358,7 +358,7 @@ public final class Download {
 
 		try {
 			String computedHash = switch (algorithm) {
-			case "sha1" -> Checksum.sha1Hex(path);
+			case "sha256" -> Checksum.sha256Hex(path);
 			default -> throw error("Unsupported hash algorithm (%s)", algorithm);
 			};
 

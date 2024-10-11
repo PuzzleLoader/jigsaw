@@ -37,6 +37,8 @@ import java.util.function.Consumer;
 
 import javax.inject.Inject;
 
+import net.fabricmc.loom.configuration.providers.cosmicreach.FinalizedCosmicReachProvider;
+
 import org.gradle.api.GradleException;
 import org.gradle.api.Project;
 import org.gradle.api.logging.Logger;
@@ -55,17 +57,11 @@ import net.fabricmc.loom.build.mixin.JavaApInvoker;
 import net.fabricmc.loom.build.mixin.KaptApInvoker;
 import net.fabricmc.loom.build.mixin.ScalaApInvoker;
 import net.fabricmc.loom.configuration.accesswidener.AccessWidenerJarProcessor;
-import net.fabricmc.loom.configuration.ifaceinject.InterfaceInjectionProcessor;
 import net.fabricmc.loom.configuration.processors.CosmicReachJarProcessorManager;
 import net.fabricmc.loom.configuration.processors.ModJavadocProcessor;
-import net.fabricmc.loom.configuration.providers.mappings.LayeredMappingsFactory;
-import net.fabricmc.loom.configuration.providers.mappings.MappingConfiguration;
 import net.fabricmc.loom.configuration.providers.cosmicreach.CosmicReachMetadataProvider;
 import net.fabricmc.loom.configuration.providers.cosmicreach.CosmicReachProvider;
 import net.fabricmc.loom.configuration.providers.cosmicreach.CosmicReachSourceSets;
-import net.fabricmc.loom.configuration.providers.cosmicreach.mapped.AbstractMappedCosmicReachProvider;
-import net.fabricmc.loom.configuration.providers.cosmicreach.mapped.IntermediaryCosmicReachProvider;
-import net.fabricmc.loom.configuration.providers.cosmicreach.mapped.NamedCosmicReachProvider;
 import net.fabricmc.loom.extension.MixinExtension;
 import net.fabricmc.loom.util.Checksum;
 import net.fabricmc.loom.util.ExceptionUtil;
@@ -125,8 +121,6 @@ public abstract class CompileConfiguration implements Runnable {
 			if (mixin.getUseLegacyMixinAp().get()) {
 				setupMixinAp(mixin);
 			}
-
-			configureDecompileTasks(configContext);
 		});
 
 		finalizedBy("eclipse", "genEclipseRuns");
@@ -161,33 +155,31 @@ public abstract class CompileConfiguration implements Runnable {
 		extension.setMinecraftProvider(minecraftProvider);
 		minecraftProvider.provide();
 
-		// Created any layered mapping files.
-		LayeredMappingsFactory.afterEvaluate(configContext);
-
-		final DependencyInfo mappingsDep = DependencyInfo.create(getProject(), Configurations.MAPPINGS);
-		final MappingConfiguration mappingConfiguration = MappingConfiguration.create(getProject(), configContext.serviceFactory(), mappingsDep, minecraftProvider);
-		extension.setMappingConfiguration(mappingConfiguration);
-		mappingConfiguration.applyToProject(getProject(), mappingsDep);
-
-		// Provide the remapped mc jars
-		final IntermediaryCosmicReachProvider<?> intermediaryMinecraftProvider = jarConfiguration.createIntermediaryMinecraftProvider(project);
-		NamedCosmicReachProvider<?> namedMinecraftProvider = jarConfiguration.createNamedMinecraftProvider(project);
+		FinalizedCosmicReachProvider<?> finalizedCosmicReachProvider = jarConfiguration.createFinalizedCosmicReachProvider(project);
 
 		registerGameProcessors(configContext);
-		CosmicReachJarProcessorManager minecraftJarProcessorManager = CosmicReachJarProcessorManager.create(getProject());
 
-		if (minecraftJarProcessorManager != null) {
-			// Wrap the named MC provider for one that will provide the processed jars
-			namedMinecraftProvider = jarConfiguration.createProcessedNamedMinecraftProvider(namedMinecraftProvider, minecraftJarProcessorManager);
+		CosmicReachJarProcessorManager cosmicReachJarProcessorManager = CosmicReachJarProcessorManager.create(getProject());
+
+		if (cosmicReachJarProcessorManager != null) {
+			System.out.println(cosmicReachJarProcessorManager + " asdfasdfasfdd");
+			finalizedCosmicReachProvider = jarConfiguration.createProcessedNamedCosmicReachProvider(finalizedCosmicReachProvider, cosmicReachJarProcessorManager);
 		}
 
-		final var provideContext = new AbstractMappedCosmicReachProvider.ProvideContext(true, extension.refreshDeps(), configContext);
+		final var provideContext = new FinalizedCosmicReachProvider.ProvideContext(true, extension.refreshDeps(), configContext);
 
-		extension.setIntermediaryMinecraftProvider(intermediaryMinecraftProvider);
-		intermediaryMinecraftProvider.provide(provideContext);
+		extension.setFinalizedCosmicReachProvider(finalizedCosmicReachProvider);
+		finalizedCosmicReachProvider.provide(provideContext);
 
-		extension.setNamedMinecraftProvider(namedMinecraftProvider);
-		namedMinecraftProvider.provide(provideContext);
+		// Created any layered mapping files.
+//		LayeredMappingsFactory.afterEvaluate(configContext);
+
+//		final DependencyInfo mappingsDep = DependencyInfo.create(getProject(), Configurations.MAPPINGS);
+//		final MappingConfiguration mappingConfiguration = MappingConfiguration.create(getProject(), configContext.serviceFactory(), mappingsDep, minecraftProvider);
+//		extension.setMappingConfiguration(mappingConfiguration);
+//		mappingConfiguration.applyToProject(getProject(), mappingsDep);
+
+		// Provide the remapped mc jars
 	}
 
 	private void registerGameProcessors(ConfigContext configContext) {
@@ -196,15 +188,15 @@ public abstract class CompileConfiguration implements Runnable {
 		final boolean enableTransitiveAccessWideners = extension.getEnableTransitiveAccessWideners().get();
 		extension.addMinecraftJarProcessor(AccessWidenerJarProcessor.class, "fabric-loom:access-widener", enableTransitiveAccessWideners, extension.getAccessWidenerPath());
 
-		if (extension.getEnableModProvidedJavadoc().get()) {
+		if (true) {
 			extension.addMinecraftJarProcessor(ModJavadocProcessor.class, "fabric-loom:mod-javadoc");
 		}
 
-		final InterfaceInjectionExtensionAPI interfaceInjection = extension.getInterfaceInjection();
+//		final InterfaceInjectionExtensionAPI interfaceInjection = extension.getInterfaceInjection();
 
-		if (interfaceInjection.isEnabled()) {
-			extension.addMinecraftJarProcessor(InterfaceInjectionProcessor.class, "fabric-loom:interface-inject", interfaceInjection.getEnableDependencyInterfaceInjection().get());
-		}
+//		if (interfaceInjection.isEnabled()) {
+//			extension.addMinecraftJarProcessor(InterfaceInjectionProcessor.class, "fabric-loom:interface-inject", interfaceInjection.getEnableDependencyInterfaceInjection().get());
+//		}
 	}
 
 	private void setupMixinAp(MixinExtension mixin) {
@@ -233,14 +225,6 @@ public abstract class CompileConfiguration implements Runnable {
 			getProject().getLogger().info("Configuring compiler arguments for Groovy");
 			new GroovyApInvoker(getProject()).configureMixin();
 		}
-	}
-
-	private void configureDecompileTasks(ConfigContext configContext) {
-		final LoomGradleExtension extension = configContext.extension();
-
-		extension.getMinecraftJarConfiguration().get()
-				.createDecompileConfiguration(getProject())
-				.afterEvaluation();
 	}
 
 	private LockFile getLockFile() {

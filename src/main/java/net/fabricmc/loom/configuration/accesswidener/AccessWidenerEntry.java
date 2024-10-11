@@ -36,13 +36,7 @@ import net.fabricmc.tinyremapper.TinyRemapper;
 public interface AccessWidenerEntry {
 	ModEnvironment environment();
 
-	/**
-	 * @return The mod id to be used in {@link TransitiveAccessWidenerMappingsProcessor} or null when this entry does not contain transitive entries.
-	 */
-	@Nullable
-	String mappingId();
-
 	String getSortKey();
 
-	void read(AccessWidenerVisitor visitor, LazyCloseable<TinyRemapper> remapper) throws IOException;
+	void read(AccessWidenerVisitor visitor) throws IOException;
 }

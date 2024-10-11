@@ -30,17 +30,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.jetbrains.annotations.Nullable;
-
 import net.fabricmc.accesswidener.AccessWidenerReader;
-import net.fabricmc.accesswidener.AccessWidenerRemapper;
 import net.fabricmc.accesswidener.AccessWidenerVisitor;
 import net.fabricmc.accesswidener.TransitiveOnlyFilter;
-import net.fabricmc.loom.api.mappings.layered.MappingsNamespace;
-import net.fabricmc.loom.util.LazyCloseable;
 import net.fabricmc.loom.util.fmj.FabricModJson;
 import net.fabricmc.loom.util.fmj.ModEnvironment;
-import net.fabricmc.tinyremapper.TinyRemapper;
 
 /**
  * {@link AccessWidenerEntry} implementation for a {@link FabricModJson}.
@@ -57,41 +51,22 @@ public record ModAccessWidenerEntry(FabricModJson mod, String path, ModEnvironme
 	}
 
 	@Override
-	public @Nullable String mappingId() {
-		return transitiveOnly ? mod.getId() : null;
-	}
-
-	@Override
 	public String getSortKey() {
 		return mod.getId() + ":" + path;
 	}
 
 	@Override
-	public void read(AccessWidenerVisitor visitor, LazyCloseable<TinyRemapper> remapper) throws IOException {
+	public void read(AccessWidenerVisitor visitor) throws IOException {
 		if (transitiveOnly) {
 			// Filter for only transitive rules
 			visitor = new TransitiveOnlyFilter(visitor);
 		}
 
 		final byte[] data = readRaw();
-		final AccessWidenerReader.Header header = AccessWidenerReader.readHeader(data);
-
-		if (!header.getNamespace().equals(MappingsNamespace.NAMED.toString())) {
-			// Remap the AW if needed
-			visitor = getRemapper(visitor, remapper.get());
-		}
+		AccessWidenerReader.readHeader(data);
 
 		var reader = new AccessWidenerReader(visitor);
 		reader.read(data);
-	}
-
-	private static AccessWidenerRemapper getRemapper(AccessWidenerVisitor visitor, TinyRemapper tinyRemapper) {
-		return new AccessWidenerRemapper(
-				visitor,
-				tinyRemapper.getEnvironment().getRemapper(),
-				MappingsNamespace.INTERMEDIARY.toString(),
-				MappingsNamespace.NAMED.toString()
-		);
 	}
 
 	private byte[] readRaw() throws IOException {

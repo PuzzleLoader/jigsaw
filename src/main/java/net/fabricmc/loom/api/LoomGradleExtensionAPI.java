@@ -44,17 +44,11 @@ import org.jetbrains.annotations.ApiStatus;
 
 import net.fabricmc.loom.api.decompilers.DecompilerOptions;
 import net.fabricmc.loom.api.manifest.VersionsManifestsAPI;
-import net.fabricmc.loom.api.mappings.intermediate.IntermediateMappingsProvider;
-import net.fabricmc.loom.api.mappings.layered.spec.LayeredMappingSpecBuilder;
 import net.fabricmc.loom.api.processor.MinecraftJarProcessor;
-import net.fabricmc.loom.api.remapping.RemapperExtension;
-import net.fabricmc.loom.api.remapping.RemapperParameters;
 import net.fabricmc.loom.configuration.ide.RunConfigSettings;
 import net.fabricmc.loom.configuration.processors.JarProcessor;
-import net.fabricmc.loom.configuration.providers.mappings.NoOpIntermediateMappingsProvider;
 import net.fabricmc.loom.configuration.providers.cosmicreach.ManifestLocations;
 import net.fabricmc.loom.configuration.providers.cosmicreach.CosmicReachJarConfiguration;
-import net.fabricmc.loom.task.GenerateSourcesTask;
 import net.fabricmc.loom.util.DeprecationHelper;
 
 /**
@@ -84,10 +78,6 @@ public interface LoomGradleExtensionAPI {
 
 	ConfigurableFileCollection getLog4jConfigs();
 
-	Dependency officialMojangMappings();
-
-	Dependency layered(Action<LayeredMappingSpecBuilder> action);
-
 	void runs(Action<NamedDomainObjectContainer<RunConfigSettings>> action);
 
 	NamedDomainObjectContainer<RunConfigSettings> getRunConfigs();
@@ -109,20 +99,6 @@ public interface LoomGradleExtensionAPI {
 	void mods(Action<NamedDomainObjectContainer<ModSettings>> action);
 
 	NamedDomainObjectContainer<ModSettings> getMods();
-
-	NamedDomainObjectList<RemapConfigurationSettings> getRemapConfigurations();
-
-	RemapConfigurationSettings addRemapConfiguration(String name, Action<RemapConfigurationSettings> action);
-
-	void createRemapConfigurations(SourceSet sourceSet);
-
-	default List<RemapConfigurationSettings> getCompileRemapConfigurations() {
-		return getRemapConfigurations().stream().filter(element -> element.getOnCompileClasspath().get()).toList();
-	}
-
-	default List<RemapConfigurationSettings> getRuntimeRemapConfigurations() {
-		return getRemapConfigurations().stream().filter(element -> element.getOnRuntimeClasspath().get()).toList();
-	}
 
 	@ApiStatus.Experimental
 	// TODO: move this from LoomGradleExtensionAPI to LoomGradleExtension once getRefmapName & setRefmapName is removed.
@@ -187,34 +163,6 @@ public interface LoomGradleExtensionAPI {
 	 */
 	Property<Boolean> getEnableModProvidedJavadoc();
 
-	@ApiStatus.Experimental
-	IntermediateMappingsProvider getIntermediateMappingsProvider();
-
-	@ApiStatus.Experimental
-	void setIntermediateMappingsProvider(IntermediateMappingsProvider intermediateMappingsProvider);
-
-	@ApiStatus.Experimental
-	<T extends IntermediateMappingsProvider> void setIntermediateMappingsProvider(Class<T> clazz, Action<T> action);
-
-	/**
-	 * An Experimental option to provide empty intermediate mappings, to be used for game versions without any intermediate mappings.
-	 */
-	@ApiStatus.Experimental
-	default void noIntermediateMappings() {
-		setIntermediateMappingsProvider(NoOpIntermediateMappingsProvider.class, p -> { });
-	}
-
-	/**
-	 * Returns the tiny mappings file used to remap the game and mods.
-	 */
-	File getMappingsFile();
-
-	/**
-	 * Returns the {@link GenerateSourcesTask} for the given {@link DecompilerOptions}.
-	 * When env source sets are split and the client param is true the decompile task for the client jar will be returned.
-	 */
-	GenerateSourcesTask getDecompileTask(DecompilerOptions options, boolean client);
-
 	/**
 	 * Use "%1$s" as a placeholder for the minecraft version.
 	 *
@@ -223,7 +171,7 @@ public interface LoomGradleExtensionAPI {
 	Property<String> getIntermediaryUrl();
 
 	@ApiStatus.Experimental
-	Property<CosmicReachJarConfiguration<?, ?, ?>> getMinecraftJarConfiguration();
+	Property<CosmicReachJarConfiguration<?, ?>> getMinecraftJarConfiguration();
 
 	default void serverOnlyMinecraftJar() {
 		getMinecraftJarConfiguration().set(CosmicReachJarConfiguration.SERVER_ONLY);
@@ -245,15 +193,8 @@ public interface LoomGradleExtensionAPI {
 
 	Property<Boolean> getSplitModDependencies();
 
-	<T extends RemapperParameters> void addRemapperExtension(Class<? extends RemapperExtension<T>> remapperExtensionClass, Class<T> parametersClass, Action<T> parameterAction);
-
 	/**
 	 * @return The minecraft version, as a {@link Provider}.
 	 */
 	Provider<String> getMinecraftVersion();
-
-	/**
-	 * @return A lazily evaluated {@link FileCollection} containing the named minecraft jars.
-	 */
-	FileCollection getNamedMinecraftJars();
 }

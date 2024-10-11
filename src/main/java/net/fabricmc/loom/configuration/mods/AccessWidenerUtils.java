@@ -33,28 +33,10 @@ import org.objectweb.asm.commons.Remapper;
 import net.fabricmc.accesswidener.AccessWidenerReader;
 import net.fabricmc.accesswidener.AccessWidenerRemapper;
 import net.fabricmc.accesswidener.AccessWidenerWriter;
-import net.fabricmc.loom.api.mappings.layered.MappingsNamespace;
 import net.fabricmc.loom.util.fmj.FabricModJson;
 import net.fabricmc.loom.util.fmj.FabricModJsonFactory;
 
 public class AccessWidenerUtils {
-	/**
-	 * Remap a mods access widener from intermediary to named, so that loader can apply it in our dev-env.
-	 */
-	public static byte[] remapAccessWidener(byte[] input, Remapper remapper) {
-		int version = AccessWidenerReader.readVersion(input);
-
-		AccessWidenerWriter writer = new AccessWidenerWriter(version);
-		AccessWidenerRemapper awRemapper = new AccessWidenerRemapper(
-				writer,
-				remapper,
-				MappingsNamespace.INTERMEDIARY.toString(),
-				MappingsNamespace.NAMED.toString()
-		);
-		AccessWidenerReader reader = new AccessWidenerReader(awRemapper);
-		reader.read(input);
-		return writer.write();
-	}
 
 	public static AccessWidenerData readAccessWidenerData(Path inputJar) throws IOException {
 		if (!FabricModJsonFactory.isModJar(inputJar)) {

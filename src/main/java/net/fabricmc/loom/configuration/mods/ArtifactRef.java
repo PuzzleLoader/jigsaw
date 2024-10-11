@@ -24,10 +24,8 @@
 
 package net.fabricmc.loom.configuration.mods;
 
-import static net.fabricmc.loom.configuration.mods.ModConfigurationRemapper.MISSING_GROUP;
-import static net.fabricmc.loom.configuration.mods.ModConfigurationRemapper.replaceIfNullOrEmpty;
-
 import java.nio.file.Path;
+import java.util.function.Supplier;
 
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
@@ -54,6 +52,10 @@ public interface ArtifactRef {
 
 	void applyToConfiguration(Project project, Configuration configuration);
 
+	public static String replaceIfNullOrEmpty(@Nullable String s, Supplier<String> fallback) {
+		return s == null || s.isEmpty() ? fallback.get() : s;
+	}
+
 	record ResolvedArtifactRef(ResolvedArtifact artifact, @Nullable Path sources) implements ArtifactRef {
 		@Override
 		public Path path() {
@@ -61,7 +63,7 @@ public interface ArtifactRef {
 		}
 
 		public String group() {
-			return replaceIfNullOrEmpty(artifact.getModuleVersion().getId().getGroup(), () -> MISSING_GROUP);
+			return replaceIfNullOrEmpty(artifact.getModuleVersion().getId().getGroup(), () -> "unspecified");
 		}
 
 		public String name() {

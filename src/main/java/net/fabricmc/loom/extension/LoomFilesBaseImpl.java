@@ -71,7 +71,7 @@ public abstract class LoomFilesBaseImpl implements LoomFiles {
 
 	@Override
 	public File getNativesDirectory(Project project) {
-		return createFile(getRootProjectPersistentCache(), "natives/" + LoomGradleExtension.get(project).getCosmicReachProvider().minecraftVersion());
+		return createFile(getRootProjectPersistentCache(), "natives/" + LoomGradleExtension.get(project).getCosmicReachProvider().cosmicReachVersion());
 	}
 
 	@Override
@@ -95,13 +95,13 @@ public abstract class LoomFilesBaseImpl implements LoomFiles {
 	}
 
 	@Override
-	public File getGlobalMinecraftRepo() {
-		return new File(getUserCache(), "minecraftMaven");
+	public File getGlobalCosmicReachRepo() {
+		return new File(getUserCache(), "cosmicMaven");
 	}
 
 	@Override
-	public File getLocalMinecraftRepo() {
-		return new File(getRootProjectPersistentCache(), "minecraftMaven");
+	public File getLocalCosmicReachRepo() {
+		return new File(getRootProjectPersistentCache(), "cosmicMaven");
 	}
 
 	@Override

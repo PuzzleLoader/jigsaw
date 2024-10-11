@@ -36,8 +36,6 @@ import net.fabricmc.loom.util.Platform;
 @SuppressWarnings("unused")
 public record CosmicReachVersionMeta(
 		Object arguments,
-		AssetIndex assetIndex,
-		String assets,
 		int complianceLevel,
 		Map<String, Download> downloads,
 		String id,

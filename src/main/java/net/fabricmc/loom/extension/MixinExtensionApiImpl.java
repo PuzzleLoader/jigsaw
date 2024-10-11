@@ -37,12 +37,10 @@ import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.util.PatternSet;
 
 import net.fabricmc.loom.api.MixinExtensionAPI;
-import net.fabricmc.loom.api.mappings.layered.MappingsNamespace;
 
 public abstract class MixinExtensionApiImpl implements MixinExtensionAPI {
 	protected final Project project;
 	protected final Property<Boolean> useMixinAp;
-	private final Property<String> refmapTargetNamespace;
 	private final MapProperty<String, String> messages;
 	private final Property<Boolean> showMessageTypes;
 
@@ -51,10 +49,6 @@ public abstract class MixinExtensionApiImpl implements MixinExtensionAPI {
 		this.useMixinAp = project.getObjects().property(Boolean.class)
 				.convention(true);
 
-		this.refmapTargetNamespace = project.getObjects().property(String.class)
-				.convention(MappingsNamespace.INTERMEDIARY.toString());
-		this.refmapTargetNamespace.finalizeValueOnRead();
-
 		this.messages = project.getObjects().mapProperty(String.class, String.class);
 		this.messages.finalizeValueOnRead();
 
@@ -62,57 +56,16 @@ public abstract class MixinExtensionApiImpl implements MixinExtensionAPI {
 		this.showMessageTypes.convention(false).finalizeValueOnRead();
 	}
 
-	protected final PatternSet add0(SourceSet sourceSet, String refmapName) {
-		return add0(sourceSet, project.provider(() -> refmapName));
-	}
-
-	protected abstract PatternSet add0(SourceSet sourceSet, Provider<String> refmapName);
+	protected abstract PatternSet add0(SourceSet sourceSet);
 
 	@Override
 	public Property<Boolean> getUseLegacyMixinAp() {
 		return useMixinAp;
 	}
 
-	@Override
-	public Property<String> getRefmapTargetNamespace() {
-		if (!getUseLegacyMixinAp().get()) throw new IllegalStateException("You need to set useLegacyMixinAp = true to configure Mixin annotation processor.");
-
-		return refmapTargetNamespace;
-	}
-
-	@Override
-	public void add(SourceSet sourceSet, String refmapName, Action<PatternSet> action) {
-		PatternSet pattern = add0(sourceSet, refmapName);
-		action.execute(pattern);
-	}
-
-	@Override
-	public void add(SourceSet sourceSet, String refmapName) {
-		add(sourceSet, refmapName, x -> { });
-	}
-
-	@Override
-	public void add(String sourceSetName, String refmapName, Action<PatternSet> action) {
-		add(sourceSetName, project.provider(() -> refmapName), action);
-	}
-
-	public void add(String sourceSetName, Provider<String> refmapName, Action<PatternSet> action) {
-		add(resolveSourceSet(sourceSetName), refmapName, action);
-	}
-
-	public void add(SourceSet sourceSet, Provider<String> refmapName, Action<PatternSet> action) {
-		PatternSet pattern = add0(sourceSet, refmapName);
-		action.execute(pattern);
-	}
-
-	@Override
-	public void add(String sourceSetName, String refmapName) {
-		add(sourceSetName, refmapName, x -> { });
-	}
-
-	@Override
 	public void add(SourceSet sourceSet, Action<PatternSet> action) {
-		add(sourceSet, getDefaultRefmapName(), action);
+		PatternSet pattern = add0(sourceSet);
+		action.execute(pattern);
 	}
 
 	@Override
@@ -122,7 +75,7 @@ public abstract class MixinExtensionApiImpl implements MixinExtensionAPI {
 
 	@Override
 	public void add(String sourceSetName, Action<PatternSet> action) {
-		add(sourceSetName, getDefaultRefmapName(), action);
+		add(sourceSetName, action);
 	}
 
 	@Override
@@ -156,21 +109,4 @@ public abstract class MixinExtensionApiImpl implements MixinExtensionAPI {
 		return sourceSet;
 	}
 
-	// This is here to ensure that LoomGradleExtensionApiImpl compiles without any unimplemented methods
-	private final class EnsureCompile extends MixinExtensionApiImpl {
-		private EnsureCompile() {
-			super(null);
-			throw new RuntimeException();
-		}
-
-		@Override
-		public Property<String> getDefaultRefmapName() {
-			throw new RuntimeException("Yeah... something is really wrong");
-		}
-
-		@Override
-		protected PatternSet add0(SourceSet sourceSet, Provider<String> refmapName) {
-			throw new RuntimeException("Yeah... something is really wrong");
-		}
-	}
 }

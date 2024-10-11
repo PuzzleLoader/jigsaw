@@ -93,38 +93,23 @@ public abstract class AnnotationProcessorInvoker<T extends Task> {
 	}
 
 	private void passMixinArguments(T task, SourceSet sourceSet) {
-		try {
-			LoomGradleExtension loom = LoomGradleExtension.get(project);
-			String refmapName = Objects.requireNonNull(MixinExtension.getMixinInformationContainer(sourceSet)).refmapNameProvider().get();
+		Map<String, String> args = new HashMap<>() {{
+				put(Constants.MixinArguments.QUIET, "true");
+			}};
 
-			final File mixinMappings = getMixinMappingsForSourceSet(project, sourceSet);
-
-			task.getOutputs().file(mixinMappings).withPropertyName("mixin-ap-" + sourceSet.getName() + "-" + name).optional();
-
-			Map<String, String> args = new HashMap<>() {{
-					put(Constants.MixinArguments.IN_MAP_FILE_NAMED_INTERMEDIARY, loom.getMappingConfiguration().tinyMappings.toFile().getCanonicalPath());
-					put(Constants.MixinArguments.OUT_MAP_FILE_NAMED_INTERMEDIARY, mixinMappings.getCanonicalPath());
-					put(Constants.MixinArguments.OUT_REFMAP_FILE, getRefmapDestination(task, refmapName));
-					put(Constants.MixinArguments.DEFAULT_OBFUSCATION_ENV, "named:" + loom.getMixin().getRefmapTargetNamespace().get());
-					put(Constants.MixinArguments.QUIET, "true");
-				}};
-
-			if (mixinExtension.getShowMessageTypes().get()) {
-				args.put(Constants.MixinArguments.SHOW_MESSAGE_TYPES, "true");
-			}
-
-			mixinExtension.getMessages().get().forEach((key, value) -> {
-				checkPattern(key, MSG_KEY_PATTERN);
-				checkPattern(value, MSG_VALUE_PATTERN);
-
-				args.put("MSG_" + key, value);
-			});
-
-			project.getLogger().debug("Outputting refmap to dir: " + getRefmapDestinationDir(task) + " for compile task: " + task);
-			args.forEach((k, v) -> passArgument(task, k, v));
-		} catch (IOException e) {
-			project.getLogger().error("Could not configure mixin annotation processors", e);
+		if (mixinExtension.getShowMessageTypes().get()) {
+			args.put(Constants.MixinArguments.SHOW_MESSAGE_TYPES, "true");
 		}
+
+		mixinExtension.getMessages().get().forEach((key, value) -> {
+			checkPattern(key, MSG_KEY_PATTERN);
+			checkPattern(value, MSG_VALUE_PATTERN);
+
+			args.put("MSG_" + key, value);
+		});
+
+		project.getLogger().debug("Outputting refmap to dir: " + getRefmapDestinationDir(task) + " for compile task: " + task);
+		args.forEach((k, v) -> passArgument(task, k, v));
 	}
 
 	public void configureMixin() {
@@ -159,8 +144,4 @@ public abstract class AnnotationProcessorInvoker<T extends Task> {
 		}
 	}
 
-	public static File getMixinMappingsForSourceSet(Project project, SourceSet sourceSet) {
-		final LoomGradleExtension extension = LoomGradleExtension.get(project);
-		return new File(extension.getFiles().getProjectBuildCache(), "mixin-map-" + extension.getMappingConfiguration().mappingsIdentifier() + "." + sourceSet.getName() + ".tiny");
-	}
 }

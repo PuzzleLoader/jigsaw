@@ -24,7 +24,6 @@
 
 package net.fabricmc.loom.api.processor;
 
-import net.fabricmc.loom.api.mappings.layered.MappingsNamespace;
 import net.fabricmc.loom.configuration.providers.cosmicreach.CosmicReachJarConfiguration;
 import net.fabricmc.loom.util.LazyCloseable;
 import net.fabricmc.mappingio.tree.MemoryMappingTree;
@@ -38,8 +37,4 @@ public interface ProcessorContext {
 	boolean includesClient();
 
 	boolean includesServer();
-
-	LazyCloseable<TinyRemapper> createRemapper(MappingsNamespace from, MappingsNamespace to);
-
-	MemoryMappingTree getMappings();
 }

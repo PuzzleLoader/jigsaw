@@ -57,8 +57,8 @@ public class DownloadBuilder {
 		return new DownloadBuilder(new URI(url));
 	}
 
-	public DownloadBuilder sha1(String sha1) {
-		this.expectedHash = "sha1:" + sha1;
+	public DownloadBuilder sha256(String sha256) {
+		this.expectedHash = "sha256:" + sha256;
 		return this;
 	}
 

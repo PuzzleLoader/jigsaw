@@ -27,6 +27,9 @@ package net.fabricmc.loom.task;
 import javax.inject.Inject;
 
 import com.google.common.base.Preconditions;
+
+import net.fabricmc.loom.configuration.providers.cosmicreach.VersionsManifest;
+
 import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.provider.Provider;
@@ -36,10 +39,8 @@ import org.gradle.api.tasks.TaskProvider;
 import net.fabricmc.loom.LoomGradleExtension;
 import net.fabricmc.loom.configuration.ide.RunConfigSettings;
 import net.fabricmc.loom.configuration.providers.cosmicreach.CosmicReachJarConfiguration;
-import net.fabricmc.loom.configuration.providers.cosmicreach.CosmicReachVersionMeta;
 import net.fabricmc.loom.task.launch.GenerateDLIConfigTask;
 import net.fabricmc.loom.task.launch.GenerateLog4jConfigTask;
-import net.fabricmc.loom.task.launch.GenerateRemapClasspathTask;
 import net.fabricmc.loom.util.Constants;
 import net.fabricmc.loom.util.gradle.GradleUtils;
 
@@ -52,17 +53,10 @@ public abstract class LoomTasks implements Runnable {
 
 	@Override
 	public void run() {
-		getTasks().register("migrateMappings", MigrateMappingsTask.class, t -> {
-			t.setDescription("Migrates mappings to a new version.");
-			t.getOutputs().upToDateWhen(o -> false);
-		});
-
 		var generateLog4jConfig = getTasks().register("generateLog4jConfig", GenerateLog4jConfigTask.class, t -> {
 			t.setDescription("Generate the log4j config file");
 		});
-		var generateRemapClasspath = getTasks().register("generateRemapClasspath", GenerateRemapClasspathTask.class, t -> {
-			t.setDescription("Generate the remap classpath file");
-		});
+
 		getTasks().register("generateDLIConfig", GenerateDLIConfigTask.class, t -> {
 			t.setDescription("Generate the DevLaunchInjector config file");
 
@@ -70,13 +64,11 @@ public abstract class LoomTasks implements Runnable {
 			t.mustRunAfter("eclipse");
 
 			t.dependsOn(generateLog4jConfig);
-			t.getRemapClasspathFile().set(generateRemapClasspath.get().getRemapClasspathFile());
 		});
 
 		getTasks().register("configureLaunch", task -> {
 			task.dependsOn(getTasks().named("generateDLIConfig"));
 			task.dependsOn(getTasks().named("generateLog4jConfig"));
-			task.dependsOn(getTasks().named("generateRemapClasspath"));
 
 			task.setDescription("Setup the required files to launch Minecraft");
 			task.setGroup(Constants.TaskGroup.PUZZLE);
@@ -101,14 +93,14 @@ public abstract class LoomTasks implements Runnable {
 				return;
 			}
 
-			final CosmicReachVersionMeta versionInfo = extension.getCosmicReachProvider().getVersionInfo();
+			final VersionsManifest.Version versionInfo = extension.getCosmicReachProvider().getVersionInfo();
 
 			if (versionInfo == null) {
 				// Something has gone wrong, don't register the task.
 				return;
 			}
 
-			registerClientSetupTasks(getTasks(), versionInfo.hasNativesToExtract());
+			registerClientSetupTasks(getTasks());
 		});
 	}
 
@@ -175,13 +167,7 @@ public abstract class LoomTasks implements Runnable {
 		});
 	}
 
-	private static void registerClientSetupTasks(TaskContainer tasks, boolean extractNatives) {
-		if (extractNatives) {
-			tasks.register("extractNatives", ExtractNativesTask.class, t -> {
-				t.setDescription("Extracts the Minecraft platform specific natives.");
-			});
-		}
-
+	private static void registerClientSetupTasks(TaskContainer tasks) {
 		tasks.register("configureClientLaunch", task -> {
 			task.dependsOn(tasks.named("configureLaunch"));
 

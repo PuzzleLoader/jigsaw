@@ -72,35 +72,11 @@ public final class CosmicReachMetadataProvider {
 		return dependency.getDependency().getVersion();
 	}
 
-	public String getMinecraftVersion() {
+	public String getCosmicReachVersion() {
 		return options.cosmicReachVersion();
 	}
 
-	public CosmicReachVersionMeta getVersionMeta() {
-		try {
-			if (versionEntry == null) {
-				versionEntry = getVersionEntry();
-			}
-
-			if (versionMeta == null) {
-				versionMeta = readVersionMeta();
-			}
-		} catch (IOException e) {
-			throw new UncheckedIOException(e.getMessage(), e);
-		}
-
-		return versionMeta;
-	}
-
-	private ManifestEntryLocation getVersionEntry() throws IOException {
-		// Custom URL always takes priority
-		if (options.customManifestUrl() != null) {
-			VersionsManifest.Version customVersion = new VersionsManifest.Version();
-			customVersion.id = options.cosmicReachVersion();
-			customVersion.url = options.customManifestUrl();
-			return new ManifestEntryLocation(null, customVersion);
-		}
-
+	public VersionsManifest.Version getVersionEntry() throws IOException {
 		final List<ManifestEntrySupplier> suppliers = new ArrayList<>();
 
 		// First try finding the version with caching
@@ -117,7 +93,7 @@ public final class CosmicReachMetadataProvider {
 			final ManifestEntryLocation version = supplier.get();
 
 			if (version != null) {
-				return version;
+				return version.entry;
 			}
 		}
 
@@ -136,6 +112,19 @@ public final class CosmicReachMetadataProvider {
 		final Path cacheFile = location.cacheFile(options.userCache());
 		final String versionManifest = builder.downloadString(cacheFile);
 		final VersionsManifest manifest = LoomGradlePlugin.GSON.fromJson(versionManifest, VersionsManifest.class);
+//		for (VersionsManifest.Version version : manifest.versions()) {
+//			System.out.println(version.id + ": ");
+//			if (version.client != null) {
+//				System.out.println("\tClient: ");
+//				System.out.println("\t\turl: " + version.client.url);
+//				System.out.println("\t\tsha256: " + version.client.sha256);
+//			}
+//			if (version.server != null) {
+//				System.out.println("\tServer: ");
+//				System.out.println("\t\turl: " + version.server.url);
+//				System.out.println("\t\tsha256: " + version.server.sha256);
+//			}
+//		}
 		final VersionsManifest.Version version = manifest.getVersion(options.cosmicReachVersion());
 
 		if (version != null) {
@@ -143,31 +132,6 @@ public final class CosmicReachMetadataProvider {
 		}
 
 		return null;
-	}
-
-	private CosmicReachVersionMeta readVersionMeta() throws IOException {
-		final DownloadBuilder builder = download.apply(versionEntry.entry.url);
-
-		if (versionEntry.entry.sha1 != null) {
-			builder.sha1(versionEntry.entry.sha1);
-		} else {
-			builder.defaultCache();
-		}
-
-		final String fileName = getVersionMetaFileName();
-		final Path cacheFile = options.workingDir().resolve(fileName);
-		final String json = builder.downloadString(cacheFile);
-		return LoomGradlePlugin.GSON.fromJson(json, CosmicReachVersionMeta.class);
-	}
-
-	private String getVersionMetaFileName() {
-		// custom version metadata
-		if (versionEntry.manifest == null) {
-			return "cosmic_reach_" + Integer.toHexString(versionEntry.entry.url.hashCode()) + ".json";
-		}
-
-		// metadata url taken from versions manifest
-		return versionEntry.manifest.name() + "_cosmic_reach_info.json";
 	}
 
 	public record Options(String cosmicReachVersion,

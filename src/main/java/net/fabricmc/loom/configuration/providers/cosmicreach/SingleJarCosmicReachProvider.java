@@ -28,38 +28,25 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-import net.fabricmc.loom.api.mappings.layered.MappingsNamespace;
 import net.fabricmc.loom.configuration.ConfigContext;
 import net.fabricmc.loom.configuration.providers.BundleMetadata;
-import net.fabricmc.loom.util.Constants;
 import net.fabricmc.tinyremapper.NonClassCopyMode;
 import net.fabricmc.tinyremapper.OutputConsumerPath;
 import net.fabricmc.tinyremapper.TinyRemapper;
 
 public abstract sealed class SingleJarCosmicReachProvider extends CosmicReachProvider permits SingleJarCosmicReachProvider.Server, SingleJarCosmicReachProvider.Client {
-	private final MappingsNamespace officialNamespace;
 	private Path minecraftEnvOnlyJar;
 
-	private SingleJarCosmicReachProvider(CosmicReachMetadataProvider metadataProvider, ConfigContext configContext, MappingsNamespace officialNamespace) {
+	private SingleJarCosmicReachProvider(CosmicReachMetadataProvider metadataProvider, ConfigContext configContext) {
 		super(metadataProvider, configContext);
-		this.officialNamespace = officialNamespace;
 	}
 
 	public static SingleJarCosmicReachProvider.Server server(CosmicReachMetadataProvider metadataProvider, ConfigContext configContext) {
-		return new SingleJarCosmicReachProvider.Server(metadataProvider, configContext, getOfficialNamespace(metadataProvider, true));
+		return new SingleJarCosmicReachProvider.Server(metadataProvider, configContext);
 	}
 
 	public static SingleJarCosmicReachProvider.Client client(CosmicReachMetadataProvider metadataProvider, ConfigContext configContext) {
-		return new SingleJarCosmicReachProvider.Client(metadataProvider, configContext, getOfficialNamespace(metadataProvider, false));
-	}
-
-	private static MappingsNamespace getOfficialNamespace(CosmicReachMetadataProvider metadataProvider, boolean server) {
-		// Versions before 1.3 don't have a common namespace, so use side specific namespaces.
-		if (!metadataProvider.getVersionMeta().isVersionOrNewer(Constants.RELEASE_TIME_1_3)) {
-			return server ? MappingsNamespace.SERVER_OFFICIAL : MappingsNamespace.CLIENT_OFFICIAL;
-		}
-
-		return MappingsNamespace.OFFICIAL;
+		return new SingleJarCosmicReachProvider.Client(metadataProvider, configContext);
 	}
 
 	@Override
@@ -118,18 +105,13 @@ public abstract sealed class SingleJarCosmicReachProvider extends CosmicReachPro
 		return minecraftEnvOnlyJar;
 	}
 
-	@Override
-	public MappingsNamespace getOfficialNamespace() {
-		return officialNamespace;
-	}
-
 	abstract SingleJarEnvType type();
 
 	abstract Path getInputJar(SingleJarCosmicReachProvider provider) throws Exception;
 
 	public static final class Server extends SingleJarCosmicReachProvider {
-		private Server(CosmicReachMetadataProvider metadataProvider, ConfigContext configContext, MappingsNamespace officialNamespace) {
-			super(metadataProvider, configContext, officialNamespace);
+		private Server(CosmicReachMetadataProvider metadataProvider, ConfigContext configContext) {
+			super(metadataProvider, configContext);
 		}
 
 		@Override
@@ -161,8 +143,8 @@ public abstract sealed class SingleJarCosmicReachProvider extends CosmicReachPro
 	}
 
 	public static final class Client extends SingleJarCosmicReachProvider {
-		private Client(CosmicReachMetadataProvider metadataProvider, ConfigContext configContext, MappingsNamespace officialNamespace) {
-			super(metadataProvider, configContext, officialNamespace);
+		private Client(CosmicReachMetadataProvider metadataProvider, ConfigContext configContext) {
+			super(metadataProvider, configContext);
 		}
 
 		@Override

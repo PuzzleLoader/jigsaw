@@ -29,6 +29,7 @@ import org.gradle.api.Project;
 import org.gradle.api.artifacts.ArtifactRepositoryContainer;
 import org.gradle.api.artifacts.dsl.RepositoryHandler;
 import org.gradle.api.artifacts.repositories.ArtifactRepository;
+import org.gradle.api.artifacts.repositories.IvyArtifactRepository;
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository;
 import org.gradle.api.initialization.Settings;
 import org.gradle.api.invocation.Gradle;
@@ -68,20 +69,20 @@ public class LoomRepositoryPlugin implements Plugin<PluginAware> {
 			repo.setUrl(MirrorUtil.getFabricRepository(target));
 		});
 
-		MavenArtifactRepository mojangRepo = repositories.maven(repo -> {
-			repo.setName("Mojang");
-			repo.setUrl(MirrorUtil.getLibrariesBase(target));
+		IvyArtifactRepository mojangRepo = repositories.ivy(repo -> { // The CR repo
+			repo.setName("CosmicArchive");
+			repo.setUrl("https://github.com/CRModders/CosmicArchive/raw/main/versions/pre-alpha");
 
-			// Don't use the gradle module metadata. It has unintended side effects.
-			repo.metadataSources(sources -> {
-				sources.mavenPom();
-				sources.artifact();
-				sources.ignoreGradleMetadataRedirection();
+			repo.patternLayout(pattern -> {
+				pattern.artifact("/[revision]/[classifier]/Cosmic Reach-[revision].jar");
+				pattern.artifact("/[revision]/[classifier]/Cosmic Reach-Server-[revision].jar");
 			});
 
-			// Fallback to maven central for artifacts such as sources or javadocs that are not mirrored on Mojang's repo.
-			// See: https://github.com/FabricMC/fabric-loom/issues/1032
-			repo.artifactUrls(ArtifactRepositoryContainer.MAVEN_CENTRAL_URL);
+			repo.metadataSources(IvyArtifactRepository.MetadataSources::artifact);
+
+			repo.content(content -> {
+				content.includeModule("finalforeach", "cosmicreach");
+			});
 		});
 
 		// If a mavenCentral repo is already defined, remove the mojang repo and add it back before the mavenCentral repo so that it will be checked first.
@@ -103,19 +104,19 @@ public class LoomRepositoryPlugin implements Plugin<PluginAware> {
 		});
 
 		repositories.maven(repo -> {
-			repo.setName("LoomGlobalMinecraft");
-			repo.setUrl(files.getGlobalMinecraftRepo());
+			repo.setName("LoomGlobalCosmicReach");
+			repo.setUrl(files.getGlobalCosmicReachRepo());
 		});
 
 		repositories.maven(repo -> {
-			repo.setName("LoomLocalMinecraft");
-			repo.setUrl(files.getLocalMinecraftRepo());
+			repo.setName("LoomLocalCosmicReach");
+			repo.setUrl(files.getLocalCosmicReachRepo());
 		});
 	}
 
 	public static void setupForLegacyVersions(RepositoryHandler repositories) {
 		// 1.4.7 contains an LWJGL version with an invalid maven pom, set the metadata sources to not use the pom for this version.
-		repositories.named("Mojang", MavenArtifactRepository.class, repo -> {
+		repositories.named("CosmicArchive", MavenArtifactRepository.class, repo -> {
 			repo.metadataSources(sources -> {
 				// Only use the maven artifact and not the pom or gradle metadata.
 				sources.artifact();

@@ -72,6 +72,11 @@ public class Checksum {
 		return Checksum.toHex(hash.asBytes());
 	}
 
+	public static String sha256Hex(Path path) throws IOException {
+		HashCode hash = Files.asByteSource(path.toFile()).hash(Hashing.sha256());
+		return Checksum.toHex(hash.asBytes());
+	}
+
 	public static String sha1Hex(Path path) throws IOException {
 		HashCode hash = Files.asByteSource(path.toFile()).hash(Hashing.sha1());
 		return toHex(hash.asBytes());

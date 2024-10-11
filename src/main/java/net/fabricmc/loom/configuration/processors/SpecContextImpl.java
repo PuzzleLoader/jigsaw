@@ -68,22 +68,6 @@ public record SpecContextImpl(List<FabricModJson> modDependencies, List<FabricMo
 		final LoomGradleExtension extension = LoomGradleExtension.get(project);
 		var mods = new ArrayList<FabricModJson>();
 
-		for (RemapConfigurationSettings entry : extension.getRemapConfigurations()) {
-			final Set<File> artifacts = entry.getSourceConfiguration().get().resolve();
-
-			for (File artifact : artifacts) {
-				final List<FabricModJson> fabricModJson = fmjCache.computeIfAbsent(artifact.toPath().toAbsolutePath().toString(), $ -> {
-					return FabricModJsonFactory.createFromZipOptional(artifact.toPath())
-							.map(List::of)
-							.orElseGet(List::of);
-				});
-
-				if (!fabricModJson.isEmpty()) {
-					mods.add(fabricModJson.get(0));
-				}
-			}
-		}
-
 		if (!GradleUtils.getBooleanProperty(project, Constants.Properties.DISABLE_PROJECT_DEPENDENT_MODS)) {
 			// Add all the dependent projects
 			for (Project dependentProject : getDependentProjects(project).toList()) {
@@ -106,7 +90,7 @@ public record SpecContextImpl(List<FabricModJson> modDependencies, List<FabricMo
 
 	// Returns a list of mods that are on both to compile and runtime classpath
 	private static List<FabricModJson> getCompileRuntimeMods(Project project, Map<String, List<FabricModJson>> fmjCache) {
-		var mods = new ArrayList<>(getCompileRuntimeModsFromRemapConfigs(project, fmjCache).toList());
+		ArrayList<FabricModJson> mods = new ArrayList<>();
 
 		for (Project dependentProject : getCompileRuntimeProjectDependencies(project).toList()) {
 			mods.addAll(fmjCache.computeIfAbsent(dependentProject.getPath(), $ -> {
@@ -115,30 +99,6 @@ public record SpecContextImpl(List<FabricModJson> modDependencies, List<FabricMo
 		}
 
 		return Collections.unmodifiableList(mods);
-	}
-
-	// Returns a list of jar mods that are found on the compile and runtime remapping configurations
-	private static Stream<FabricModJson> getCompileRuntimeModsFromRemapConfigs(Project project, Map<String, List<FabricModJson>> fmjCache) {
-		final LoomGradleExtension extension = LoomGradleExtension.get(project);
-		final List<Path> runtimeEntries = extension.getRuntimeRemapConfigurations().stream()
-				.filter(settings -> settings.getApplyDependencyTransforms().get())
-				.flatMap(resolveArtifacts(project, true))
-				.toList();
-
-		return extension.getCompileRemapConfigurations().stream()
-				.filter(settings -> settings.getApplyDependencyTransforms().get())
-				.flatMap(resolveArtifacts(project, false))
-				.filter(runtimeEntries::contains) // Use the intersection of the two configurations.
-				.map(zipPath -> {
-					final List<FabricModJson> list = fmjCache.computeIfAbsent(zipPath.toAbsolutePath().toString(), $ -> {
-						return FabricModJsonFactory.createFromZipOptional(zipPath)
-								.map(List::of)
-								.orElseGet(List::of);
-					});
-					return list.isEmpty() ? null : list.get(0);
-				})
-				.filter(Objects::nonNull)
-				.sorted(Comparator.comparing(FabricModJson::getId));
 	}
 
 	private static Function<RemapConfigurationSettings, Stream<Path>> resolveArtifacts(Project project, boolean runtime) {

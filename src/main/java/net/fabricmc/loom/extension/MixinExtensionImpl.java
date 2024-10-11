@@ -49,35 +49,19 @@ import org.jetbrains.annotations.NotNull;
 
 public class MixinExtensionImpl extends MixinExtensionApiImpl implements MixinExtension {
 	private boolean isDefault;
-	private final Property<String> defaultRefmapName;
 
 	@Inject
 	public MixinExtensionImpl(Project project) {
 		super(project);
 		this.isDefault = true;
-		this.defaultRefmapName = project.getObjects().property(String.class)
-				.convention(project.provider(this::getDefaultMixinRefmapName));
 	}
 
 	@Override
-	public Property<String> getDefaultRefmapName() {
-		if (!super.getUseLegacyMixinAp().get()) throw new IllegalStateException("You need to set useLegacyMixinAp = true to configure Mixin annotation processor.");
-
-		return defaultRefmapName;
-	}
-
-	private String getDefaultMixinRefmapName() {
-		String defaultRefmapName = project.getExtensions().getByType(BasePluginExtension.class).getArchivesName().get() + "-refmap.json";
-		project.getLogger().info("Could not find refmap definition, will be using default name: " + defaultRefmapName);
-		return defaultRefmapName;
-	}
-
-	@Override
-	protected PatternSet add0(SourceSet sourceSet, Provider<String> refmapName) {
+	protected PatternSet add0(SourceSet sourceSet) {
 		if (!super.getUseLegacyMixinAp().get()) throw new IllegalStateException("You need to set useLegacyMixinAp = true to configure Mixin annotation processor.");
 
 		PatternSet pattern = new PatternSet().setIncludes(Collections.singletonList("**/*.json"));
-		MixinExtension.setMixinInformationContainer(sourceSet, new MixinExtension.MixinInformationContainer(sourceSet, refmapName, pattern));
+		MixinExtension.setMixinInformationContainer(sourceSet, new MixinExtension.MixinInformationContainer(sourceSet, pattern));
 
 		isDefault = false;
 
@@ -133,7 +117,7 @@ public class MixinExtensionImpl extends MixinExtensionApiImpl implements MixinEx
 			if (sourceSet.getName().equals("main")) {
 				add(sourceSet);
 			} else {
-				add(sourceSet, sourceSet.getName() + "-" + getDefaultRefmapName().get());
+				add(sourceSet);
 			}
 		});
 	}

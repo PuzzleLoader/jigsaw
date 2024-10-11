@@ -42,7 +42,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.fabricmc.loom.LoomGradleExtension;
-import net.fabricmc.loom.api.processor.MappingProcessorContext;
 import net.fabricmc.loom.api.processor.MinecraftJarProcessor;
 import net.fabricmc.loom.api.processor.ProcessorContext;
 import net.fabricmc.loom.api.processor.SpecContext;
@@ -137,34 +136,14 @@ public final class CosmicReachJarProcessorManager {
 		}
 	}
 
-	public boolean processMappings(MemoryMappingTree mappings, MappingProcessorContext context) {
-		boolean transformed = false;
-
-		for (ProcessorEntry<?> entry : jarProcessors) {
-			if (entry.processMappings(mappings, context)) {
-				transformed = true;
-			}
-		}
-
-		return transformed;
-	}
-
-	record ProcessorEntry<S extends MinecraftJarProcessor.Spec>(S spec, MinecraftJarProcessor<S> processor, @Nullable MinecraftJarProcessor.MappingsProcessor<S> mappingsProcessor) {
+	record ProcessorEntry<S extends MinecraftJarProcessor.Spec>(S spec, MinecraftJarProcessor<S> processor) {
 		@SuppressWarnings("unchecked")
 		ProcessorEntry(MinecraftJarProcessor<?> processor, MinecraftJarProcessor.Spec spec) {
-			this((S) Objects.requireNonNull(spec), (MinecraftJarProcessor<S>) processor, (MinecraftJarProcessor.MappingsProcessor<S>) processor.processMappings());
+			this((S) Objects.requireNonNull(spec), (MinecraftJarProcessor<S>) processor);
 		}
 
 		private void processJar(Path jar, ProcessorContext context) throws IOException {
 			processor().processJar(jar, spec, context);
-		}
-
-		private boolean processMappings(MemoryMappingTree mappings, MappingProcessorContext context) {
-			if (mappingsProcessor() == null) {
-				return false;
-			}
-
-			return mappingsProcessor().transform(mappings, spec, context);
 		}
 
 		private String name() {

@@ -35,8 +35,6 @@ import org.gradle.api.tasks.SourceSet;
 import org.gradle.jvm.tasks.Jar;
 
 import net.fabricmc.loom.LoomGradleExtension;
-import net.fabricmc.loom.configuration.RemapConfigurations;
-import net.fabricmc.loom.task.AbstractRemapJarTask;
 import net.fabricmc.loom.util.Constants;
 import net.fabricmc.loom.util.gradle.SourceSetHelper;
 
@@ -101,6 +99,7 @@ public abstract sealed class CosmicReachSourceSets permits CosmicReachSourceSets
 
 		@Override
 		public void applyDependencies(BiConsumer<String, CosmicReachJar.Type> consumer, List<CosmicReachJar.Type> targets) {
+			System.out.println("69420");
 			for (CosmicReachJar.Type target : targets) {
 				consumer.accept(COSMICREACH_NAMED.compile(), target);
 				consumer.accept(COSMICREACH_NAMED.runtime(), target);
@@ -211,21 +210,12 @@ public abstract sealed class CosmicReachSourceSets permits CosmicReachSourceSets
 			extendsFrom(project, testSourceSet.getRuntimeClasspathConfigurationName(), clientOnlySourceSet.getRuntimeClasspathConfigurationName());
 			project.getDependencies().add(testSourceSet.getImplementationConfigurationName(), clientOnlySourceSet.getOutput());
 
-			RemapConfigurations.configureClientConfigurations(project, clientOnlySourceSet);
-
 			// Include the client only output in the jars
 			project.getTasks().named(mainSourceSet.getJarTaskName(), Jar.class).configure(jar -> {
 				jar.from(clientOnlySourceSet.getOutput().getClassesDirs());
 				jar.from(clientOnlySourceSet.getOutput().getResourcesDir());
 
 				jar.dependsOn(project.getTasks().named(clientOnlySourceSet.getProcessResourcesTaskName()));
-			});
-
-			// Remap with the client compile classpath.
-			project.getTasks().withType(AbstractRemapJarTask.class).configureEach(remapJarTask -> {
-				remapJarTask.getClasspath().from(
-						project.getConfigurations().getByName(clientOnlySourceSet.getCompileClasspathConfigurationName())
-				);
 			});
 
 			// The sources task can be registered at a later time.
@@ -239,10 +229,6 @@ public abstract sealed class CosmicReachSourceSets permits CosmicReachSourceSets
 				jar.from(clientOnlySourceSet.getAllSource());
 			});
 
-			project.getTasks().withType(AbstractRemapJarTask.class, task -> {
-				// Set the default client only source set name
-				task.getClientOnlySourceSetName().convention(CLIENT_ONLY_SOURCE_SET_NAME);
-			});
 		}
 
 		@Override

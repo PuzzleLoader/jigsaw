@@ -5,10 +5,8 @@ plugins {
 	id 'idea'
 	id 'eclipse'
 	id 'groovy'
-	id 'checkstyle'
 	id 'codenarc'
 	alias(libs.plugins.kotlin) apply false // Delay this so we can perform magic 🪄 first.
-	alias(libs.plugins.spotless)
 	alias(libs.plugins.retry)
 }
 
@@ -86,7 +84,6 @@ configurations {
 	}
 	compileClasspath.extendsFrom bootstrap
 	runtimeClasspath.extendsFrom bootstrap
-	testRuntimeClasspath.extendsFrom bootstrap
 }
 
 configurations.configureEach {
@@ -180,25 +177,7 @@ dependencies {
 	// Kapt integration
 	compileOnly libs.kotlin.gradle.plugin
 
-	// Testing
-	testImplementation(gradleTestKit())
-	testImplementation(testLibs.spock) {
-		exclude module: 'groovy-all'
-	}
-	testImplementation testLibs.junit.jupiter.engine
-	testRuntimeOnly testLibs.junit.platform.launcher
-	testImplementation (testLibs.javalin) {
-		exclude group: 'org.jetbrains.kotlin'
-	}
-	testImplementation testLibs.mockito
-	testImplementation testLibs.java.debug
-
 	compileOnly runtimeLibs.jetbrains.annotations
-	testCompileOnly runtimeLibs.jetbrains.annotations
-
-	testCompileOnly (testLibs.mixin) {
-		transitive = false
-	}
 }
 
 jar {
@@ -227,45 +206,6 @@ java {
 	targetCompatibility = JavaVersion.VERSION_17
 }
 
-spotless {
-	lineEndings = com.diffplug.spotless.LineEnding.UNIX
-
-	java {
-		licenseHeaderFile(rootProject.file("HEADER")).yearSeparator("-")
-		targetExclude("**/loom/util/DownloadUtil.java")
-	}
-
-	groovy {
-		importOrder('java', 'javax', '', 'net.fabricmc', '\\#')
-		licenseHeaderFile(rootProject.file("HEADER")).yearSeparator("-")
-		greclipse()
-	}
-
-	groovyGradle {
-		target 'src/**/*.gradle', '*.gradle'
-		greclipse()
-	}
-
-	kotlin {
-		licenseHeaderFile(rootProject.file("HEADER")).yearSeparator("-")
-		targetExclude("**/build.gradle.kts")
-		targetExclude("src/test/resources/projects/*/**")
-		ktlint()
-	}
-}
-
-checkstyle {
-	configFile = file('checkstyle.xml')
-	toolVersion = libs.versions.checkstyle.get()
-}
-
-// Workaround https://github.com/gradle/gradle/issues/27035
-configurations.checkstyle {
-	resolutionStrategy.capabilitiesResolution.withCapability("com.google.collections:google-collections") {
-		select("com.google.guava:guava:0")
-	}
-}
-
 codenarc {
 	toolVersion = libs.versions.codenarc.get()
 	configFile = file("codenarc.groovy")
@@ -278,34 +218,6 @@ gradlePlugin {
 			implementationClass = 'net.fabricmc.loom.bootstrap.LoomGradlePluginBootstrap'
 		}
 	}
-}
-
-test {
-	maxHeapSize = "2560m"
-	jvmArgs "-XX:+HeapDumpOnOutOfMemoryError"
-	useJUnitPlatform()
-
-	// Forward system prop onto tests.
-	if (System.getProperty("fabric.loom.test.homeDir")) {
-		systemProperty "fabric.loom.test.homeDir", System.getProperty("fabric.loom.test.homeDir")
-	}
-
-
-	if (ENV.CI) {
-		retry {
-			maxRetries = 3
-		}
-	}
-}
-
-// Workaround https://github.com/gradle/gradle/issues/25898
-tasks.withType(Test).configureEach {
-	jvmArgs = [
-		'--add-opens=java.base/java.lang=ALL-UNNAMED',
-		'--add-opens=java.base/java.util=ALL-UNNAMED',
-		'--add-opens=java.base/java.lang.invoke=ALL-UNNAMED',
-		'--add-opens=java.base/java.net=ALL-UNNAMED'
-	]
 }
 
 
@@ -374,40 +286,6 @@ tasks.withType(GenerateModuleMetadata).configureEach {
 		}
 
 		file.text = groovy.json.JsonOutput.toJson(metadata)
-	}
-}
-
-// A task to output a json file with a list of all the test to run
-tasks.register('writeActionsTestMatrix') {
-	doLast {
-		def testMatrix = []
-		file('src/test/groovy/net/fabricmc/loom/test/integration').eachFile {
-			if (it.name.endsWith("Test.groovy")) {
-				if (it.name.endsWith("ReproducibleBuildTest.groovy")) {
-					// This test gets a special case to run across all os's
-					return
-				}
-
-				if (it.name.endsWith("DebugLineNumbersTest.groovy")) {
-					// Known flakey test
-					return
-				}
-
-				def className = it.name.replace(".groovy", "")
-				testMatrix.add("net.fabricmc.loom.test.integration.${className}")
-			}
-		}
-
-		// Run all the unit tests together
-		testMatrix.add("net.fabricmc.loom.test.unit.*")
-
-		// Kotlin tests
-		testMatrix.add("net.fabricmc.loom.test.kotlin.*")
-
-		def json = groovy.json.JsonOutput.toJson(testMatrix)
-		def output = file("build/test_matrix.json")
-		output.parentFile.mkdir()
-		output.text = json
 	}
 }
 

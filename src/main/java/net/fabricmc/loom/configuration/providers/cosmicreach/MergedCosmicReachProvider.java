@@ -34,7 +34,6 @@ import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.fabricmc.loom.api.mappings.layered.MappingsNamespace;
 import net.fabricmc.loom.configuration.ConfigContext;
 
 public final class MergedCosmicReachProvider extends CosmicReachProvider {
@@ -55,11 +54,6 @@ public final class MergedCosmicReachProvider extends CosmicReachProvider {
 	@Override
 	public List<Path> getCosmicReachJars() {
 		return List.of(cosmicReachMergedJar);
-	}
-
-	@Override
-	public MappingsNamespace getOfficialNamespace() {
-		return MappingsNamespace.OFFICIAL;
 	}
 
 	@Override
@@ -106,6 +100,7 @@ public final class MergedCosmicReachProvider extends CosmicReachProvider {
 			jarMerger.enableSyntheticParamsOffset();
 			jarMerger.merge();
 		}
+
 	}
 
 	public Path getMergedJar() {

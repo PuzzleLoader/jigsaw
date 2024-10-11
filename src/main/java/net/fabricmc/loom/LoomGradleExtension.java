@@ -25,8 +25,9 @@
 package net.fabricmc.loom;
 
 import java.nio.file.Path;
-import java.util.Collection;
 import java.util.List;
+
+import net.fabricmc.loom.configuration.providers.cosmicreach.FinalizedCosmicReachProvider;
 
 import org.gradle.api.Project;
 import org.gradle.api.file.ConfigurableFileCollection;
@@ -35,20 +36,14 @@ import org.gradle.api.provider.ListProperty;
 import org.jetbrains.annotations.ApiStatus;
 
 import net.fabricmc.loom.api.LoomGradleExtensionAPI;
-import net.fabricmc.loom.api.mappings.layered.MappingsNamespace;
 import net.fabricmc.loom.configuration.InstallerData;
 import net.fabricmc.loom.configuration.LoomDependencyManager;
 import net.fabricmc.loom.configuration.accesswidener.AccessWidenerFile;
-import net.fabricmc.loom.configuration.providers.mappings.LayeredMappingsFactory;
-import net.fabricmc.loom.configuration.providers.mappings.MappingConfiguration;
 import net.fabricmc.loom.configuration.providers.cosmicreach.CosmicReachMetadataProvider;
 import net.fabricmc.loom.configuration.providers.cosmicreach.CosmicReachProvider;
 import net.fabricmc.loom.configuration.providers.cosmicreach.library.LibraryProcessorManager;
-import net.fabricmc.loom.configuration.providers.cosmicreach.mapped.IntermediaryCosmicReachProvider;
-import net.fabricmc.loom.configuration.providers.cosmicreach.mapped.NamedCosmicReachProvider;
 import net.fabricmc.loom.extension.LoomFiles;
 import net.fabricmc.loom.extension.MixinExtension;
-import net.fabricmc.loom.extension.RemapperExtensionHolder;
 import net.fabricmc.loom.util.download.DownloadBuilder;
 
 @ApiStatus.Internal
@@ -77,27 +72,9 @@ public interface LoomGradleExtension extends LoomGradleExtensionAPI {
 
 	void setMinecraftProvider(CosmicReachProvider minecraftProvider);
 
-	MappingConfiguration getMappingConfiguration();
-
-	void setMappingConfiguration(MappingConfiguration mappingConfiguration);
-
-	NamedCosmicReachProvider<?> getNamedCosmicReachProvider();
-
-	IntermediaryCosmicReachProvider<?> getIntermediaryMinecraftProvider();
-
-	void setNamedMinecraftProvider(NamedCosmicReachProvider<?> namedMinecraftProvider);
-
-	void setIntermediaryMinecraftProvider(IntermediaryCosmicReachProvider<?> intermediaryMinecraftProvider);
-
-	default List<Path> getMinecraftJars(MappingsNamespace mappingsNamespace) {
-		return switch (mappingsNamespace) {
-		case NAMED -> getNamedCosmicReachProvider().getMinecraftJarPaths();
-		case INTERMEDIARY -> getIntermediaryMinecraftProvider().getMinecraftJarPaths();
-		case OFFICIAL, CLIENT_OFFICIAL, SERVER_OFFICIAL -> getCosmicReachProvider().getCosmicReachJars();
-		};
+	default List<Path> getMinecraftJars() {
+		return getFinalizedCosmicReachProvider().getCosmicReachJarPaths();
 	}
-
-	FileCollection getMinecraftJarsCollection(MappingsNamespace mappingsNamespace);
 
 	boolean isRootProject();
 
@@ -116,9 +93,11 @@ public interface LoomGradleExtension extends LoomGradleExtensionAPI {
 
 	ListProperty<LibraryProcessorManager.LibraryProcessorFactory> getLibraryProcessors();
 
-	ListProperty<RemapperExtensionHolder> getRemapperExtensions();
-
-	Collection<LayeredMappingsFactory> getLayeredMappingFactories();
-
 	boolean isConfigurationCacheActive();
+
+	FileCollection  getMinecraftJarsCollection();
+
+	void setFinalizedCosmicReachProvider(FinalizedCosmicReachProvider<?> finalizedCosmicReachProvider);
+
+	FinalizedCosmicReachProvider<?> getFinalizedCosmicReachProvider();
 }

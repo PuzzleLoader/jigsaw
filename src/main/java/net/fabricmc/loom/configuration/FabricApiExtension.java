@@ -176,7 +176,6 @@ public abstract class FabricApiExtension {
 				mod.sourceSet(DATAGEN_SOURCESET_NAME);
 			});
 
-			extension.createRemapConfigurations(sourceSets.getByName(DATAGEN_SOURCESET_NAME));
 		}
 
 		if (settings.getCreateRunConfiguration().get()) {

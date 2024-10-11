@@ -31,14 +31,12 @@ import java.util.List;
 import java.util.Objects;
 
 import com.google.common.base.Preconditions;
-import org.gradle.api.JavaVersion;
 import org.gradle.api.Project;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.fabricmc.loom.LoomGradleExtension;
-import net.fabricmc.loom.api.mappings.layered.MappingsNamespace;
 import net.fabricmc.loom.configuration.ConfigContext;
 import net.fabricmc.loom.configuration.providers.BundleMetadata;
 import net.fabricmc.loom.util.download.DownloadExecutor;
@@ -66,26 +64,34 @@ public abstract class CosmicReachProvider {
 	}
 
 	protected boolean provideClient() {
-		return true;
+		try {
+			return metadataProvider.getVersionEntry().client != null;
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	protected boolean provideServer() {
-		return true;
+		try {
+			return metadataProvider.getVersionEntry().server != null;
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	public void provide() throws Exception {
 		initFiles();
 
-		final CosmicReachVersionMeta.JavaVersion javaVersion = getVersionInfo().javaVersion();
-
-		if (javaVersion != null) {
-			final int requiredMajorJavaVersion = getVersionInfo().javaVersion().majorVersion();
-			final JavaVersion requiredJavaVersion = JavaVersion.toVersion(requiredMajorJavaVersion);
-
-			if (!JavaVersion.current().isCompatibleWith(requiredJavaVersion)) {
-				throw new IllegalStateException("CoSmIcReAcH " + minecraftVersion() + " requires Java " + requiredJavaVersion + " but Gradle is using " + JavaVersion.current());
-			}
-		}
+//		final CosmicReachVersionMeta.JavaVersion javaVersion = getVersionInfo().javaVersion();
+//
+//		if (javaVersion != null) {
+//			final int requiredMajorJavaVersion = getVersionInfo().javaVersion().majorVersion();
+//			final JavaVersion requiredJavaVersion = JavaVersion.toVersion(requiredMajorJavaVersion);
+//
+//			if (!JavaVersion.current().isCompatibleWith(requiredJavaVersion)) {
+//				throw new IllegalStateException("CoSmIcReAcH " + minecraftVersion() + " requires Java " + requiredJavaVersion + " but Gradle is using " + JavaVersion.current());
+//			}
+//		}
 
 		downloadJars();
 
@@ -110,19 +116,21 @@ public abstract class CosmicReachProvider {
 
 	private void downloadJars() throws IOException {
 		try (ProgressGroup progressGroup = new ProgressGroup(getProject(), "Download CoSmIcReAcH jars");
-				DownloadExecutor executor = new DownloadExecutor(2)) {
+
+		DownloadExecutor executor = new DownloadExecutor(2)) {
+
 			if (provideClient()) {
-				final CosmicReachVersionMeta.Download client = getVersionInfo().download("client");
-				getExtension().download(client.url())
-						.sha1(client.sha1())
+				final VersionsManifest.Client client = getVersionInfo().client;
+				getExtension().download(client.url)
+						.sha256(client.sha256)
 						.progress(new GradleDownloadProgressListener("CoSmIcReAcH client", progressGroup::createProgressLogger))
 						.downloadPathAsync(cosmicReachClientJar.toPath(), executor);
 			}
 
 			if (provideServer()) {
-				final CosmicReachVersionMeta.Download server = getVersionInfo().download("server");
-				getExtension().download(server.url())
-						.sha1(server.sha1())
+				final VersionsManifest.Server server = getVersionInfo().server;
+				getExtension().download(server.url)
+						.sha256(server.sha256)
 						.progress(new GradleDownloadProgressListener("CoSmIcReAcH server", progressGroup::createProgressLogger))
 						.downloadPathAsync(cosmicReachServerJar.toPath(), executor);
 			}
@@ -143,7 +151,7 @@ public abstract class CosmicReachProvider {
 	}
 
 	public File workingDir() {
-		return cosmicWorkingDirectory(configContext.project(), minecraftVersion());
+		return cosmicWorkingDirectory(configContext.project(), cosmicReachVersion());
 	}
 
 	public File dir(String path) {
@@ -178,12 +186,16 @@ public abstract class CosmicReachProvider {
 		return cosmicReachServerJar;
 	}
 
-	public String minecraftVersion() {
-		return Objects.requireNonNull(metadataProvider, "Metadata provider not setup").getMinecraftVersion();
+	public String cosmicReachVersion() {
+		return Objects.requireNonNull(metadataProvider, "Metadata provider not setup").getCosmicReachVersion();
 	}
 
-	public CosmicReachVersionMeta getVersionInfo() {
-		return Objects.requireNonNull(metadataProvider, "Metadata provider not setup").getVersionMeta();
+	public VersionsManifest.Version getVersionInfo() {
+		try {
+			return Objects.requireNonNull(metadataProvider, "Metadata provider not setup").getVersionEntry();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Nullable
@@ -192,8 +204,6 @@ public abstract class CosmicReachProvider {
 	}
 
 	public abstract List<Path> getCosmicReachJars();
-
-	public abstract MappingsNamespace getOfficialNamespace();
 
 	protected Project getProject() {
 		return configContext.project();

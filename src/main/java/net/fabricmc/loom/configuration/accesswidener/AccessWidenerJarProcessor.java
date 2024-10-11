@@ -39,7 +39,6 @@ import org.gradle.api.file.RegularFileProperty;
 import org.jetbrains.annotations.Nullable;
 
 import net.fabricmc.accesswidener.AccessWidener;
-import net.fabricmc.loom.api.mappings.layered.MappingsNamespace;
 import net.fabricmc.loom.api.processor.MinecraftJarProcessor;
 import net.fabricmc.loom.api.processor.ProcessorContext;
 import net.fabricmc.loom.api.processor.SpecContext;
@@ -133,18 +132,12 @@ public class AccessWidenerJarProcessor implements MinecraftJarProcessor<AccessWi
 
 		final var accessWidener = new AccessWidener();
 
-		try (LazyCloseable<TinyRemapper> remapper = context.createRemapper(MappingsNamespace.INTERMEDIARY, MappingsNamespace.NAMED)) {
-			for (AccessWidenerEntry widener : accessWideners) {
-				widener.read(accessWidener, remapper);
-			}
+		for (AccessWidenerEntry widener : accessWideners) {
+			widener.read(accessWidener);
 		}
 
 		AccessWidenerTransformer transformer = new AccessWidenerTransformer(accessWidener);
 		transformer.apply(jar);
 	}
 
-	@Override
-	public @Nullable MappingsProcessor<Spec> processMappings() {
-		return TransitiveAccessWidenerMappingsProcessor.INSTANCE;
-	}
 }

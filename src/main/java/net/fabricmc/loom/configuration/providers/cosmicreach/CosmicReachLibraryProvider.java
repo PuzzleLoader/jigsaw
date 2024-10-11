@@ -96,32 +96,32 @@ public class CosmicReachLibraryProvider {
 	}
 
 	private void provideClientLibraries() {
-		final List<Library> libraries = MinecraftLibraryHelper.getLibrariesForPlatform(cosmicReachProvider.getVersionInfo(), platform);
-		final List<Library> processLibraries = processLibraries(libraries);
-		processLibraries.forEach(this::applyClientLibrary);
+//		final List<Library> libraries = MinecraftLibraryHelper.getLibrariesForPlatform(cosmicReachProvider.getVersionInfo(), platform);
+//		final List<Library> processLibraries = processLibraries(libraries);
+//		processLibraries.forEach(this::applyClientLibrary);
 
 		// After Minecraft 1.19-pre1 the natives should be on the runtime classpath.
-		if (!cosmicReachProvider.getVersionInfo().hasNativesToExtract()) {
-			project.getConfigurations().named(Constants.Configurations.COSMICREACH_RUNTIME_LIBRARIES, configuration -> configuration.extendsFrom(project.getConfigurations().getByName(Constants.Configurations.COSMICREACH_NATIVES)));
-		}
+//		if (!cosmicReachProvider.getVersionInfo().hasNativesToExtract()) {
+//			project.getConfigurations().named(Constants.Configurations.COSMICREACH_RUNTIME_LIBRARIES, configuration -> configuration.extendsFrom(project.getConfigurations().getByName(Constants.Configurations.COSMICREACH_NATIVES)));
+//		}
 	}
 
 	private void provideServerLibraries() {
-		final BundleMetadata serverBundleMetadata = cosmicReachProvider.getServerBundleMetadata();
-
-		if (serverBundleMetadata == null) {
-			return;
-		}
-
-		final List<Library> libraries = MinecraftLibraryHelper.getServerLibraries(serverBundleMetadata);
-		final List<Library> processLibraries = processLibraries(libraries);
-		processLibraries.forEach(this::applyServerLibrary);
+//		final BundleMetadata serverBundleMetadata = cosmicReachProvider.getServerBundleMetadata();
+//
+//		if (serverBundleMetadata == null) {
+//			return;
+//		}
+//
+//		final List<Library> libraries = MinecraftLibraryHelper.getServerLibraries(serverBundleMetadata);
+//		final List<Library> processLibraries = processLibraries(libraries);
+//		processLibraries.forEach(this::applyServerLibrary);
 	}
 
-	private List<Library> processLibraries(List<Library> libraries) {
-		final LibraryContext libraryContext = new LibraryContext(cosmicReachProvider.getVersionInfo(), getTargetRuntimeJavaVersion());
-		return processorManager.processLibraries(libraries, libraryContext);
-	}
+//	private List<Library> processLibraries(List<Library> libraries) {
+//		final LibraryContext libraryContext = new LibraryContext(cosmicReachProvider.getVersionInfo(), getTargetRuntimeJavaVersion());
+//		return processorManager.processLibraries(libraries, libraryContext);
+//	}
 
 	private JavaVersion getTargetRuntimeJavaVersion() {
 		final Object property = project.findProperty(Constants.Properties.RUNTIME_JAVA_COMPATIBILITY_VERSION);
