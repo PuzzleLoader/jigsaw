@@ -6,6 +6,7 @@ plugins {
 	id 'eclipse'
 	id 'groovy'
 	id 'codenarc'
+	id "com.gradleup.shadow" version "8.3.3"
 	alias(libs.plugins.kotlin) apply false // Delay this so we can perform magic 🪄 first.
 	alias(libs.plugins.retry)
 }
@@ -75,6 +76,10 @@ repositories {
 		name = 'Fabric'
 		url = 'https://maven.fabricmc.net/'
 	}
+	maven {
+		url = "https://jitpack.io"
+	}
+	gradlePluginPortal()
 	mavenCentral()
 }
 
@@ -121,8 +126,15 @@ sourceSets {
 	}
 }
 
+shadowJar.zip64 = true
+
 dependencies {
 	implementation gradleApi()
+
+	implementation("com.github.PuzzleLoader:access_manipulators:${access_manipulators_version}")
+	implementation("org.apache.maven:maven-artifact:3.6.3")
+
+	shadow("com.github.johnrengelman:shadow:8.1.1")
 
 	bootstrap project(":bootstrap")
 

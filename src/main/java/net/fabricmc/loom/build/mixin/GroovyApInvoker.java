@@ -58,8 +58,4 @@ public class GroovyApInvoker extends AnnotationProcessorInvoker<GroovyCompile> {
 		compileTask.getOptions().getCompilerArgs().add("-A" + key + "=" + value);
 	}
 
-	@Override
-	protected File getRefmapDestinationDir(GroovyCompile task) {
-		return task.getDestinationDirectory().getAsFile().get();
-	}
 }

@@ -69,8 +69,6 @@ public class Constants {
 		 * Before Minecraft 1.19-pre1 this contains libraries that need to be extracted otherwise this goes on the runtime classpath.
 		 */
 		public static final String COSMICREACH_NATIVES = "minecraftNatives";
-		public static final String MAPPINGS = "mappings";
-		public static final String MAPPINGS_FINAL = "mappingsFinal";
 		public static final String LOADER_DEPENDENCIES = "loaderLibraries";
 		public static final String LOOM_DEVELOPMENT_DEPENDENCIES = "loomDevelopmentDependencies";
 		public static final String MAPPING_CONSTANTS = "mappingsConstants";
@@ -153,7 +151,6 @@ public class Constants {
 		public static final String JAR_TYPE = "Fabric-Jar-Type";
 		public static final String GRADLE_VERSION = "Fabric-Gradle-Version";
 		public static final String LOOM_VERSION = "Fabric-Loom-Version";
-		public static final String MIXIN_COMPILE_EXTENSIONS_VERSION = "Fabric-Mixin-Compile-Extensions-Version";
 		public static final String MINECRAFT_VERSION = "Fabric-Minecraft-Version";
 		public static final String TINY_REMAPPER_VERSION = "Fabric-Tiny-Remapper-Version";
 		public static final String FABRIC_LOADER_VERSION = "Fabric-Loader-Version";

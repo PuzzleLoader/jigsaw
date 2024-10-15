@@ -56,8 +56,4 @@ public class JavaApInvoker extends AnnotationProcessorInvoker<JavaCompile> {
 		compileTask.getOptions().getCompilerArgs().add("-A" + key + "=" + value);
 	}
 
-	@Override
-	protected File getRefmapDestinationDir(JavaCompile task) {
-		return task.getDestinationDirectory().getAsFile().get();
-	}
 }

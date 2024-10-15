@@ -29,6 +29,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import net.fabricmc.loom.configuration.providers.cosmicreach.CosmicReachSourceSets;
+
 import org.gradle.api.NamedDomainObjectProvider;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
@@ -59,9 +61,28 @@ public abstract class LoomConfigurations implements Runnable {
 	@Inject
 	protected abstract DependencyHandler getDependencies();
 
+	void registerConfigs(boolean isClient, String bundleName, String modName, String internalName) {
+		Configuration CompileOnly = getConfigurations().getByName(isClient ? "clientCompileOnly" : "compileOnly");
+
+		Configuration BundleConfiguration = register(bundleName, Role.BOTH).get();
+		BundleConfiguration.setDescription("Make this dependency included in your mod jar");
+		getConfigurations().getByName(isClient ? "clientImplementation" : "implementation").extendsFrom(BundleConfiguration);
+
+		Configuration ModConfiguration = registerInvisible(modName, Role.NONE).get();
+		ModConfiguration.setDescription("This dependency is considered a mod");
+		CompileOnly.extendsFrom(ModConfiguration);
+
+		Configuration InternalConfiguration = registerInvisible(internalName, Role.NONE).get();
+		CompileOnly.extendsFrom(InternalConfiguration);
+	}
+
 	@Override
 	public void run() {
-		final LoomGradleExtension extension = LoomGradleExtension.get(getProject());
+
+		registerConfigs(false, "bundle", "mod", "internal");
+		try {
+			registerConfigs(true, "clientBundle", "clientMod", "clientInternal");
+		} catch (Exception ignore) {}
 
 		register(Constants.Configurations.MOD_COMPILE_CLASSPATH, Role.RESOLVABLE);
 		registerNonTransitive(Constants.Configurations.MOD_COMPILE_CLASSPATH_MAPPED, Role.RESOLVABLE);
@@ -134,15 +155,10 @@ public abstract class LoomConfigurations implements Runnable {
 
 		extendsFrom(JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME, Constants.Configurations.MAPPING_CONSTANTS);
 
-		register(Constants.Configurations.MAPPINGS, Role.RESOLVABLE);
-		register(Constants.Configurations.MAPPINGS_FINAL, Role.RESOLVABLE);
 		register(Constants.Configurations.LOOM_DEVELOPMENT_DEPENDENCIES, Role.RESOLVABLE);
 		register(Constants.Configurations.UNPICK_CLASSPATH, Role.RESOLVABLE);
 		register(Constants.Configurations.LOCAL_RUNTIME, Role.RESOLVABLE);
 		extendsFrom(JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME, Constants.Configurations.LOCAL_RUNTIME);
-
-		extendsFrom(JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME, Constants.Configurations.MAPPINGS_FINAL);
-		extendsFrom(JavaPlugin.TEST_RUNTIME_CLASSPATH_CONFIGURATION_NAME, Constants.Configurations.MAPPINGS_FINAL);
 
 		extendsFrom(JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME, Constants.Configurations.COSMICREACH_RUNTIME_LIBRARIES);
 
@@ -155,6 +171,12 @@ public abstract class LoomConfigurations implements Runnable {
 
 	private NamedDomainObjectProvider<Configuration> register(String name, Role role) {
 		return getConfigurations().register(name, role::apply);
+	}
+
+	private NamedDomainObjectProvider<Configuration> registerInvisible(String name, Role role) {
+		final NamedDomainObjectProvider<Configuration> provider = register(name, role);
+		provider.configure(configuration -> configuration.setVisible(false));
+		return provider;
 	}
 
 	private NamedDomainObjectProvider<Configuration> registerNonTransitive(String name, Role role) {
@@ -170,7 +192,8 @@ public abstract class LoomConfigurations implements Runnable {
 	enum Role {
 		NONE(false, false),
 		CONSUMABLE(true, false),
-		RESOLVABLE(false, true);
+		RESOLVABLE(false, true),
+		BOTH(true, true);
 
 		private final boolean canBeConsumed;
 		private final boolean canBeResolved;

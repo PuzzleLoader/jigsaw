@@ -45,7 +45,6 @@ import net.fabricmc.loom.extension.MixinExtension;
 public class KaptApInvoker extends AnnotationProcessorInvoker<JavaCompile> {
 	private final KaptExtension kaptExtension = project.getExtensions().getByType(KaptExtension.class);
 	// Refmap will be written to here with mixin, then moved after JavaCompile to the correct place
-	private final File dummyRefmapDirectory;
 
 	public KaptApInvoker(Project project) {
 		super(
@@ -53,14 +52,6 @@ public class KaptApInvoker extends AnnotationProcessorInvoker<JavaCompile> {
 				AnnotationProcessorInvoker.getApConfigurations(project, KaptApInvoker::getKaptConfigurationName),
 				getInvokerTasks(project),
 				"Kotlin");
-
-		try {
-			dummyRefmapDirectory = Files.createTempDirectory("temp_refmap").toFile();
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-
-		dummyRefmapDirectory.deleteOnExit();
 
 		// Needed for mixin AP to run
 		kaptExtension.setIncludeCompileClasspath(false);
@@ -98,8 +89,4 @@ public class KaptApInvoker extends AnnotationProcessorInvoker<JavaCompile> {
 		});
 	}
 
-	@Override
-	protected File getRefmapDestinationDir(JavaCompile task) {
-		return dummyRefmapDirectory;
-	}
 }

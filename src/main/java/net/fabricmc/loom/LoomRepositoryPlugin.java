@@ -24,6 +24,7 @@
 
 package net.fabricmc.loom;
 
+import org.apache.maven.artifact.versioning.ComparableVersion;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.ArtifactRepositoryContainer;
@@ -40,6 +41,8 @@ import org.jetbrains.annotations.NotNull;
 import net.fabricmc.loom.extension.LoomFiles;
 import net.fabricmc.loom.util.MirrorUtil;
 
+import java.util.Objects;
+
 public class LoomRepositoryPlugin implements Plugin<PluginAware> {
 	@Override
 	public void apply(@NotNull PluginAware target) {
@@ -54,10 +57,60 @@ public class LoomRepositoryPlugin implements Plugin<PluginAware> {
 			}
 
 			declareRepositories(project.getRepositories(), LoomFiles.create(project), project);
+			setupProjectDependencies(project);
 		} else if (target instanceof Gradle) {
 			return;
 		} else {
 			throw new IllegalArgumentException("Expected target to be a Project or Settings, but was a " + target.getClass());
+		}
+	}
+
+	public void addImpl(Project project, String dep) {
+		project.getDependencies().add("compileOnly", dep);
+		project.getDependencies().add("runtimeOnly", dep);
+	}
+
+	static ComparableVersion PUZZLE_VERSION_REFACTOR = new ComparableVersion("2.0.0");
+
+	private void setupProjectDependencies(Project project) {
+		// Puzzle Loader
+		if (project.getProperties().get("puzzle_loader_version") != null) {
+			if (!project.getProperties().get("puzzle_loader_version").toString().contains("development"))
+				addImpl(project, getPuzzleLoader((String) project.getProperties().get("puzzle_loader_version")));
+		}
+
+		// Puzzle Paradox
+		if (project.getProperties().get("puzzle_paradox_version") != null) {
+			addImpl(project, getPuzzleParadox((String) project.getProperties().get("puzzle_paradox_version")));
+		}
+
+		// Access Manipulators
+		if (project.getProperties().get("access_manipulators_version") != null) {
+			addImpl(project, getAccessManipulators((String) project.getProperties().get("access_manipulators_version")));
+		}
+
+		if (project.getProperties().get("puzzle_loader_version") != null) {
+			if (Objects.equals(project.getProperties().get("puzzle_loader_version").toString(), "development-fabric"))
+				addImpl(project, "net.fabricmc:sponge-mixin:0.15.3+mixin.0.8.7");
+			else if (Objects.equals(project.getProperties().get("puzzle_loader_version").toString(), "development-sponge"))
+				addImpl(project, "org.spongepowered:mixin:0.8.5");
+
+			// Asm
+			addImpl(project, "org.ow2.asm:asm:9.6");
+			addImpl(project, "org.ow2.asm:asm-tree:9.6");
+			addImpl(project, "org.ow2.asm:asm-util:9.6");
+			addImpl(project, "org.ow2.asm:asm-analysis:9.6");
+			addImpl(project, "org.ow2.asm:asm-commons:9.6");
+
+			if (project.getProperties().get("puzzle_loader_version").toString().contains("development")) return;
+
+			ComparableVersion puzzleVersionString = new ComparableVersion(project.getProperties().get("puzzle_loader_version").toString());
+
+			// Mixins
+			if (puzzleVersionString.compareTo(PUZZLE_VERSION_REFACTOR) > 0)
+				addImpl(project, "net.fabricmc:sponge-mixin:0.15.3+mixin.0.8.7");
+			else
+				addImpl(project, "org.spongepowered:mixin:0.8.5");
 		}
 	}
 
@@ -166,5 +219,35 @@ public class LoomRepositoryPlugin implements Plugin<PluginAware> {
 				filter.includeGroup("org.lwjgl");
 			});
 		});
+	}
+
+	/**
+	 * Gets the Maven formatted string to Puzzle Paradox with the specified ${version}
+	 * @param ver Version of PuzzleParadox
+	 * @return Gradle dependency ready formatted string
+	 * @since 1.1.0
+	 */
+	static String getPuzzleParadox(String ver) {
+		return "com.github.PuzzleLoader:Paradox:" + ver;
+	}
+
+	/**
+	 * Gets the Maven formatted string to Puzzle Loader with the specified ${version}
+	 * @param ver Version of PuzzleLoader
+	 * @return Gradle dependency ready formatted string
+	 * @since 1.0.0
+	 */
+	static String getPuzzleLoader(String ver) {
+		return "com.github.PuzzleLoader:PuzzleLoader:" + ver;
+	}
+
+	/**
+	 * Gets the Maven formatted string to Access Manipulators with the specified ${version}
+	 * @param ver Version of Access Manipulators
+	 * @return Gradle dependency ready formatted string
+	 * @since 1.0.0
+	 */
+	static String getAccessManipulators(String ver) {
+		return "com.github.PuzzleLoader:access_manipulators:" + ver;
 	}
 }

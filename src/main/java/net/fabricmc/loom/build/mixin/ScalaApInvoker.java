@@ -58,8 +58,4 @@ public class ScalaApInvoker extends AnnotationProcessorInvoker<ScalaCompile> {
 		compileTask.getOptions().getCompilerArgs().add("-A" + key + "=" + value);
 	}
 
-	@Override
-	protected File getRefmapDestinationDir(ScalaCompile task) {
-		return task.getDestinationDirectory().get().getAsFile();
-	}
 }

@@ -86,12 +86,6 @@ public abstract class AnnotationProcessorInvoker<T extends Task> {
 
 	protected abstract void passArgument(T compileTask, String key, String value);
 
-	protected abstract File getRefmapDestinationDir(T task);
-
-	protected final String getRefmapDestination(T task, String refmapName) throws IOException {
-		return new File(getRefmapDestinationDir(task), refmapName).getCanonicalPath();
-	}
-
 	private void passMixinArguments(T task, SourceSet sourceSet) {
 		Map<String, String> args = new HashMap<>() {{
 				put(Constants.MixinArguments.QUIET, "true");
@@ -108,26 +102,23 @@ public abstract class AnnotationProcessorInvoker<T extends Task> {
 			args.put("MSG_" + key, value);
 		});
 
-		project.getLogger().debug("Outputting refmap to dir: " + getRefmapDestinationDir(task) + " for compile task: " + task);
 		args.forEach((k, v) -> passArgument(task, k, v));
 	}
 
 	public void configureMixin() {
 		ConfigurationContainer configs = project.getConfigurations();
-		CosmicReachSourceSets minecraftSourceSets = CosmicReachSourceSets.get(project);
 
 		if (!IdeaUtils.isIdeaSync()) {
 			for (Configuration processorConfig : apConfigurations) {
 				project.getLogger().info("Adding mixin to classpath of AP config: " + processorConfig.getName());
 				// Pass named MC classpath to mixin AP classpath
 				processorConfig.extendsFrom(
-						configs.getByName(Constants.Configurations.LOADER_DEPENDENCIES),
-						configs.getByName(Constants.Configurations.MAPPINGS_FINAL)
+						configs.getByName(Constants.Configurations.LOADER_DEPENDENCIES)
 				);
 
 				// Add Mixin and mixin extensions (fabric-mixin-compile-extensions pulls mixin itself too)
-				project.getDependencies().add(processorConfig.getName(),
-						LoomVersions.MIXIN_COMPILE_EXTENSIONS.mavenNotation());
+//				project.getDependencies().add(processorConfig.getName(),
+//						LoomVersions.MIXIN_COMPILE_EXTENSIONS.mavenNotation());
 			}
 		}
 

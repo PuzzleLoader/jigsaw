@@ -49,7 +49,6 @@ public abstract class JarManifestService implements BuildService<JarManifestServ
 	interface Params extends BuildServiceParameters {
 		Property<String> getGradleVersion();
 		Property<String> getLoomVersion();
-		Property<String> getMCEVersion();
 		Property<String> getMinecraftVersion();
 		Property<String> getTinyRemapperVersion();
 		Property<String> getFabricLoaderVersion();
@@ -64,7 +63,6 @@ public abstract class JarManifestService implements BuildService<JarManifestServ
 
 				params.getGradleVersion().set(GradleVersion.current().getVersion());
 				params.getLoomVersion().set(LoomGradlePlugin.JIGSAW_VERSION);
-				params.getMCEVersion().set(LoomVersions.MIXIN_COMPILE_EXTENSIONS.version());
 				params.getMinecraftVersion().set(project.provider(() -> extension.getCosmicReachProvider().cosmicReachVersion()));
 				params.getTinyRemapperVersion().set(tinyRemapperVersion.orElse("unknown"));
 				params.getFabricLoaderVersion().set(project.provider(() -> Optional.ofNullable(extension.getInstallerData()).map(InstallerData::version).orElse("unknown")));
@@ -91,7 +89,6 @@ public abstract class JarManifestService implements BuildService<JarManifestServ
 
 		attributes.putValue(Constants.Manifest.GRADLE_VERSION, p.getGradleVersion().get());
 		attributes.putValue(Constants.Manifest.LOOM_VERSION, p.getLoomVersion().get());
-		attributes.putValue(Constants.Manifest.MIXIN_COMPILE_EXTENSIONS_VERSION, p.getMCEVersion().get());
 		attributes.putValue(Constants.Manifest.MINECRAFT_VERSION, p.getMinecraftVersion().get());
 		attributes.putValue(Constants.Manifest.TINY_REMAPPER_VERSION, p.getTinyRemapperVersion().get());
 		attributes.putValue(Constants.Manifest.FABRIC_LOADER_VERSION, p.getFabricLoaderVersion().get());
