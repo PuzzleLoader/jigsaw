@@ -1,8 +1,6 @@
 package net.fabricmc.loom.configuration.providers.cosmicreach;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -10,19 +8,14 @@ import java.nio.file.StandardCopyOption;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.StringJoiner;
 import java.util.function.Function;
 
 import net.fabricmc.loom.LoomGradleExtension;
 import net.fabricmc.loom.configuration.ConfigContext;
 import net.fabricmc.loom.configuration.mods.dependency.LocalMavenHelper;
-import net.fabricmc.loom.configuration.processors.ProcessorContextImpl;
 import net.fabricmc.loom.extension.LoomFiles;
 
-import net.fabricmc.tinyremapper.OutputConsumerPath;
-
 import org.gradle.api.Project;
-import org.gradle.util.internal.MavenUtil;
 
 public abstract class FinalizedCosmicReachProvider<M extends CosmicReachProvider> implements MappedMinecraftProvider {
 
@@ -87,14 +80,14 @@ public abstract class FinalizedCosmicReachProvider<M extends CosmicReachProvider
 
 		@Override
 		public List<CosmicReachJar.Type> getDependencyTypes() {
-			return List.of(CosmicReachJar.Type.CLIENT_ONLY, CosmicReachJar.Type.COMMON);
+			return List.of(CosmicReachJar.Type.CLIENT, CosmicReachJar.Type.SERVER);
 		}
 
 		@Override
 		public List<RemappedJars> getRemappedJars() {
 			return List.of(
-					new RemappedJars(minecraftProvider.getCosmicReachCommonJar(), getCommonJar()),
-					new RemappedJars(minecraftProvider.getCosmicReachClientOnlyJar(), getClientOnlyJar())
+					new RemappedJars(minecraftProvider.getCosmicReachServerJar().toPath(), getServerJar()),
+					new RemappedJars(minecraftProvider.getCosmicReachClientJar().toPath(), getClientJar())
 			);
 		}
 	}

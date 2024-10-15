@@ -254,7 +254,7 @@ publishing {
 					Node groupId = dependency.appendChild(document.createElement('groupId'))
 					groupId.setTextContent('net.fabricmc')
 					Node artifactId = dependency.appendChild(document.createElement('artifactId'))
-					artifactId.setTextContent('fabric-loom')
+					artifactId.setTextContent('jigsaw-gradle')
 					Node version = dependency.appendChild(document.createElement('version'))
 					version.setTextContent(baseVersion + '-SNAPSHOT')
 				})

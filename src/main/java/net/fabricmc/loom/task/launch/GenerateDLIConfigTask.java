@@ -35,10 +35,7 @@ import java.util.Map;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
-import net.fabricmc.loom.configuration.providers.cosmicreach.CosmicReachProvider;
-
 import net.fabricmc.loom.configuration.providers.cosmicreach.FinalizedCosmicReachProvider;
-import net.fabricmc.loom.configuration.providers.cosmicreach.SplitCosmicReachProvider;
 
 import org.apache.commons.io.FileUtils;
 import org.gradle.api.Project;
@@ -46,7 +43,6 @@ import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.logging.configuration.ConsoleOutput;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Input;
-import org.gradle.api.tasks.InputFile;
 import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction;
@@ -148,8 +144,8 @@ public abstract class GenerateDLIConfigTask extends AbstractLoomTask {
 		FinalizedCosmicReachProvider.Split split = (FinalizedCosmicReachProvider.Split) getExtension().getFinalizedCosmicReachProvider();
 
 		return switch (env) {
-		case "client" -> split.getClientOnlyJar().getPath().toAbsolutePath().toString();
-		case "common" -> split.getCommonJar().getPath().toAbsolutePath().toString();
+		case "client" -> split.getClientJar().getPath().toAbsolutePath().toString();
+		case "common" -> split.getServerJar().getPath().toAbsolutePath().toString();
 		default -> throw new UnsupportedOperationException();
 		};
 	}

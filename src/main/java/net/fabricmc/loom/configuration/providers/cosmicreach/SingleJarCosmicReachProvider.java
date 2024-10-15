@@ -127,8 +127,7 @@ public abstract sealed class SingleJarCosmicReachProvider extends CosmicReachPro
 				return provider.getCosmicReachServerJar().toPath();
 			}
 
-			provider.extractBundledServerJar();
-			return provider.getCosmicReachExtractedServerJar().toPath();
+			return provider.getCosmicReachServerJar().toPath();
 		}
 
 		@Override

@@ -26,17 +26,17 @@ public interface MappedMinecraftProvider {
 	}
 
 	interface Split extends ProviderImpl {
-		default CosmicReachJar getCommonJar() {
-			return new CosmicReachJar.Common(getJar(CosmicReachJar.Type.COMMON));
+		default CosmicReachJar getServerJar() {
+			return new CosmicReachJar.Server(getJar(CosmicReachJar.Type.SERVER));
 		}
 
-		default CosmicReachJar getClientOnlyJar() {
-			return new CosmicReachJar.ClientOnly(getJar(CosmicReachJar.Type.CLIENT_ONLY));
+		default CosmicReachJar getClientJar() {
+			return new CosmicReachJar.Client(getJar(CosmicReachJar.Type.CLIENT));
 		}
 
 		@Override
 		default List<CosmicReachJar> getCosmicReachJars() {
-			return List.of(getCommonJar(), getClientOnlyJar());
+			return List.of(getServerJar(), getClientJar());
 		}
 	}
 

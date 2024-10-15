@@ -49,10 +49,8 @@ public abstract class CosmicReachProvider {
 	private final CosmicReachMetadataProvider metadataProvider;
 
 	private File cosmicReachClientJar;
-	// Note this will be the boostrap jar starting with 21w39a
 	private File cosmicReachServerJar;
-	// The extracted server jar from the boostrap, only exists in >=21w39a
-	private File cosmicReachExtractedServerJar;
+
 	@Nullable
 	private BundleMetadata serverBundleMetadata;
 
@@ -110,7 +108,6 @@ public abstract class CosmicReachProvider {
 
 		if (provideServer()) {
 			cosmicReachServerJar = file("cosmic-reach-server.jar");
-			cosmicReachExtractedServerJar = file("cosmic-reach-extracted_server.jar");
 		}
 	}
 
@@ -137,19 +134,6 @@ public abstract class CosmicReachProvider {
 		}
 	}
 
-	protected final void extractBundledServerJar() throws IOException {
-		Preconditions.checkArgument(provideServer(), "Not configured to provide server jar");
-		Objects.requireNonNull(getServerBundleMetadata(), "Cannot bundled mc jar from none bundled server jar");
-
-		LOGGER.info(":Extracting server jar from bootstrap");
-
-		if (getServerBundleMetadata().versions().size() != 1) {
-			throw new UnsupportedOperationException("Expected only 1 version in META-INF/versions.list, but got %d".formatted(getServerBundleMetadata().versions().size()));
-		}
-
-		getServerBundleMetadata().versions().get(0).unpackEntry(cosmicReachServerJar.toPath(), getCosmicReachExtractedServerJar().toPath(), configContext.project());
-	}
-
 	public File workingDir() {
 		return cosmicWorkingDirectory(configContext.project(), cosmicReachVersion());
 	}
@@ -171,13 +155,6 @@ public abstract class CosmicReachProvider {
 	public File getCosmicReachClientJar() {
 		Preconditions.checkArgument(provideClient(), "Not configured to provide client jar");
 		return cosmicReachClientJar;
-	}
-
-	// May be null on older versions
-	@Nullable
-	public File getCosmicReachExtractedServerJar() {
-		Preconditions.checkArgument(provideServer(), "Not configured to provide server jar");
-		return cosmicReachExtractedServerJar;
 	}
 
 	// This may be the server bundler jar on newer versions prob not what you want.

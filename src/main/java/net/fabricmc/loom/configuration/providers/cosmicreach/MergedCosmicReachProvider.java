@@ -82,11 +82,6 @@ public final class MergedCosmicReachProvider extends CosmicReachProvider {
 		File cosmicReachClientJar = getCosmicReachClientJar();
 		File cosmicReachServerJar = getCosmicReachServerJar();
 
-		if (getServerBundleMetadata() != null) {
-			extractBundledServerJar();
-			cosmicReachServerJar = getCosmicReachExtractedServerJar();
-		}
-
 		mergeJars(cosmicReachClientJar, cosmicReachServerJar, cosmicReachMergedJar.toFile());
 	}
 

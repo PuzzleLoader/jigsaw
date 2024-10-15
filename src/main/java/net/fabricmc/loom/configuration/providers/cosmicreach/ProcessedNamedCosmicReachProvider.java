@@ -181,21 +181,21 @@ public abstract class ProcessedNamedCosmicReachProvider<M extends CosmicReachPro
 		}
 
 		@Override
-		public CosmicReachJar getCommonJar() {
-			return getProcessedJar(getParentMinecraftProvider().getCommonJar());
+		public CosmicReachJar getServerJar() {
+			return getProcessedJar(getParentMinecraftProvider().getServerJar());
 		}
 
 		@Override
-		public CosmicReachJar getClientOnlyJar() {
-			return getProcessedJar(getParentMinecraftProvider().getClientOnlyJar());
+		public CosmicReachJar getClientJar() {
+			return getProcessedJar(getParentMinecraftProvider().getClientJar());
 		}
 
 
 		@Override
 		public List<RemappedJars> getRemappedJars() {
 			return List.of(
-					new RemappedJars(minecraftProvider.getCosmicReachCommonJar(), getCommonJar()),
-					new RemappedJars(minecraftProvider.getCosmicReachClientOnlyJar(), getClientOnlyJar())
+					new RemappedJars(minecraftProvider.getCosmicReachServerJar().toPath(), getServerJar()),
+					new RemappedJars(minecraftProvider.getCosmicReachClientJar().toPath(), getClientJar())
 			);
 		}
 	}

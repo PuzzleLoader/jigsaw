@@ -28,7 +28,7 @@ import java.io.File;
 import java.nio.file.Path;
 import java.util.Objects;
 
-public abstract sealed class CosmicReachJar permits CosmicReachJar.Client, CosmicReachJar.ClientOnly, CosmicReachJar.Common, CosmicReachJar.Merged, CosmicReachJar.Server {
+public abstract sealed class CosmicReachJar permits CosmicReachJar.Client, CosmicReachJar.Merged, CosmicReachJar.Server {
 	private final Path path;
 	private final boolean merged, client, server;
 	private final Type type;
@@ -82,17 +82,6 @@ public abstract sealed class CosmicReachJar permits CosmicReachJar.Client, Cosmi
 		}
 	}
 
-	public static final class Common extends CosmicReachJar {
-		public Common(Path path) {
-			super(path, false, false, true, Type.COMMON);
-		}
-
-		@Override
-		public CosmicReachJar forPath(Path path) {
-			return new Common(path);
-		}
-	}
-
 	public static final class Server extends CosmicReachJar {
 		public Server(Path path) {
 			super(path, false, false, true, Type.SERVER);
@@ -116,29 +105,13 @@ public abstract sealed class CosmicReachJar permits CosmicReachJar.Client, Cosmi
 		}
 	}
 
-	// Split client jar
-	public static final class ClientOnly extends CosmicReachJar {
-		public ClientOnly(Path path) {
-			super(path, false, true, false, Type.CLIENT_ONLY);
-		}
-
-		@Override
-		public CosmicReachJar forPath(Path path) {
-			return new ClientOnly(path);
-		}
-	}
-
 	public enum Type {
 		// Merged jar
 		MERGED("merged"),
 
 		// Regular jars, not merged or split
 		SERVER("server"),
-		CLIENT("client"),
-
-		// Split jars
-		COMMON("common"),
-		CLIENT_ONLY("clientOnly");
+		CLIENT("client");
 
 		private final String name;
 

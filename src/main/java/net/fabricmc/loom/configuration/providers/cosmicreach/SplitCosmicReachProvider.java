@@ -24,16 +24,12 @@
 
 package net.fabricmc.loom.configuration.providers.cosmicreach;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
 import net.fabricmc.loom.configuration.ConfigContext;
-import net.fabricmc.loom.configuration.providers.BundleMetadata;
 
 public final class SplitCosmicReachProvider extends CosmicReachProvider {
-	private Path cosmicReachClientOnlyJar;
-	private Path cosmicReachCommonJar;
 
 	public SplitCosmicReachProvider(CosmicReachMetadataProvider metadataProvider, ConfigContext configContext) {
 		super(metadataProvider, configContext);
@@ -42,59 +38,15 @@ public final class SplitCosmicReachProvider extends CosmicReachProvider {
 	@Override
 	protected void initFiles() {
 		super.initFiles();
-
-		cosmicReachClientOnlyJar = path("minecraft-client-only.jar");
-		cosmicReachCommonJar = path("minecraft-common.jar");
 	}
 
 	@Override
 	public List<Path> getCosmicReachJars() {
-		return List.of(cosmicReachClientOnlyJar, cosmicReachCommonJar);
+		return List.of(getCosmicReachClientJar().toPath(), getCosmicReachServerJar().toPath());
 	}
 
 	@Override
 	public void provide() throws Exception {
 		super.provide();
-
-		boolean requiresRefresh = getExtension().refreshDeps() || Files.notExists(cosmicReachClientOnlyJar) || Files.notExists(cosmicReachCommonJar);
-
-		if (!requiresRefresh) {
-			return;
-		}
-
-		BundleMetadata serverBundleMetadata = getServerBundleMetadata();
-
-		if (serverBundleMetadata == null) {
-			throw new UnsupportedOperationException("Only CosmicReach versions using a bundled server jar can be split, please use a merged jar setup for this version of cosmicReach");
-		}
-
-		extractBundledServerJar();
-
-		final Path clientJar = getCosmicReachClientJar().toPath();
-		final Path serverJar = getCosmicReachExtractedServerJar().toPath();
-
-		try (CosmicReachJarSplitter jarSplitter = new CosmicReachJarSplitter(clientJar, serverJar)) {
-			// Required for loader to compute the version info also useful to have in both jars.
-			jarSplitter.sharedEntry("post_build/Cosmic-Reach-Localization/CREDITS.txt");
-			jarSplitter.sharedEntry("build_assets/Licences/COSMIC_REACH_LICENSE.txt");
-			jarSplitter.sharedEntry("build_assets/Licences/COSMIC_REACH_LOCALIZATION.txt");
-			jarSplitter.sharedEntry("build_assets/Licences/COSMIC_REACH_SAVE_LOCATION.txt");
-			jarSplitter.sharedEntry("build_assets/version.txt");
-
-			jarSplitter.split(cosmicReachClientOnlyJar, cosmicReachCommonJar);
-		} catch (Exception e) {
-			Files.deleteIfExists(cosmicReachClientOnlyJar);
-			Files.deleteIfExists(cosmicReachCommonJar);
-
-			throw new RuntimeException("Failed to split cosmicReach", e);
-		}
-	}
-
-	public Path getCosmicReachClientOnlyJar() {
-		return cosmicReachClientOnlyJar;
-	}
-
-	public Path getCosmicReachCommonJar() {
-		return cosmicReachCommonJar;
 	}
 }

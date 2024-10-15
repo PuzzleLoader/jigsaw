@@ -46,22 +46,22 @@ public abstract class LoomFilesBaseImpl implements LoomFiles {
 
 	@Override
 	public File getUserCache() {
-		return createFile(getGradleUserHomeDir(), "caches" + File.separator + "fabric-loom");
+		return createFile(getGradleUserHomeDir(), "caches" + File.separator + "jigsaw-gradle");
 	}
 
 	@Override
 	public File getRootProjectPersistentCache() {
-		return createFile(getRootDir(), ".gradle" + File.separator + "loom-cache");
+		return createFile(getRootDir(), ".gradle" + File.separator + "jigsaw-cache");
 	}
 
 	@Override
 	public File getProjectPersistentCache() {
-		return createFile(getProjectDir(), ".gradle" + File.separator + "loom-cache");
+		return createFile(getProjectDir(), ".gradle" + File.separator + "jigsaw-cache");
 	}
 
 	@Override
 	public File getProjectBuildCache() {
-		return createFile(getBuildDir(), "loom-cache");
+		return createFile(getBuildDir(), "jigsaw-cache");
 	}
 
 	@Override

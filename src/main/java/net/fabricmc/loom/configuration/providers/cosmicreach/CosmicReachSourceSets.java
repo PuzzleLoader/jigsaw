@@ -131,13 +131,13 @@ public abstract sealed class CosmicReachSourceSets permits CosmicReachSourceSets
 	 * Used when we have a split client/common source set and split jars.
 	 */
 	public static final class Split extends CosmicReachSourceSets {
-		private static final ConfigurationName COSMICREACH_COMMON_NAMED = new ConfigurationName(
+		private static final ConfigurationName COSMICREACH_SERVER_NAMED = new ConfigurationName(
 				"cosmicReachCommonNamed",
 				Constants.Configurations.COSMICREACH_COMPILE_LIBRARIES,
 				Constants.Configurations.COSMICREACH_RUNTIME_LIBRARIES
 		);
 		// Depends on the Minecraft client libraries.
-		private static final ConfigurationName COSMICREACH_CLIENT_ONLY_NAMED = new ConfigurationName(
+		private static final ConfigurationName COSMICREACH_CLIENT_NAMED = new ConfigurationName(
 				"cosmicReachClientOnlyNamed",
 				Constants.Configurations.COSMICREACH_CLIENT_COMPILE_LIBRARIES,
 				Constants.Configurations.COSMICREACH_CLIENT_RUNTIME_LIBRARIES
@@ -150,13 +150,13 @@ public abstract sealed class CosmicReachSourceSets permits CosmicReachSourceSets
 		@Override
 		public void applyDependencies(BiConsumer<String, CosmicReachJar.Type> consumer, List<CosmicReachJar.Type> targets) {
 			Preconditions.checkArgument(targets.size() == 2);
-			Preconditions.checkArgument(targets.contains(CosmicReachJar.Type.COMMON));
-			Preconditions.checkArgument(targets.contains(CosmicReachJar.Type.CLIENT_ONLY));
+			Preconditions.checkArgument(targets.contains(CosmicReachJar.Type.SERVER));
+			Preconditions.checkArgument(targets.contains(CosmicReachJar.Type.CLIENT));
 
-			consumer.accept(COSMICREACH_COMMON_NAMED.runtime(), CosmicReachJar.Type.COMMON);
-			consumer.accept(COSMICREACH_CLIENT_ONLY_NAMED.runtime(), CosmicReachJar.Type.CLIENT_ONLY);
-			consumer.accept(COSMICREACH_COMMON_NAMED.compile(), CosmicReachJar.Type.COMMON);
-			consumer.accept(COSMICREACH_CLIENT_ONLY_NAMED.compile(), CosmicReachJar.Type.CLIENT_ONLY);
+			consumer.accept(COSMICREACH_SERVER_NAMED.runtime(), CosmicReachJar.Type.SERVER);
+			consumer.accept(COSMICREACH_CLIENT_NAMED.runtime(), CosmicReachJar.Type.CLIENT);
+			consumer.accept(COSMICREACH_SERVER_NAMED.compile(), CosmicReachJar.Type.SERVER);
+			consumer.accept(COSMICREACH_CLIENT_NAMED.compile(), CosmicReachJar.Type.CLIENT);
 		}
 
 		@Override
@@ -166,7 +166,7 @@ public abstract sealed class CosmicReachSourceSets permits CosmicReachSourceSets
 
 		@Override
 		protected List<ConfigurationName> getConfigurations() {
-			return List.of(COSMICREACH_COMMON_NAMED, COSMICREACH_CLIENT_ONLY_NAMED);
+			return List.of(COSMICREACH_SERVER_NAMED, COSMICREACH_CLIENT_NAMED);
 		}
 
 		// Called during evaluation, when the loom extension method is called.
@@ -179,14 +179,14 @@ public abstract sealed class CosmicReachSourceSets permits CosmicReachSourceSets
 			final SourceSet clientOnlySourceSet = SourceSetHelper.createSourceSet(CLIENT_ONLY_SOURCE_SET_NAME, project);
 
 			// Add Minecraft to the main and client source sets.
-			extendsFrom(project, mainSourceSet.getCompileClasspathConfigurationName(), COSMICREACH_COMMON_NAMED.compile());
-			extendsFrom(project, mainSourceSet.getRuntimeClasspathConfigurationName(), COSMICREACH_COMMON_NAMED.runtime());
-			extendsFrom(project, clientOnlySourceSet.getCompileClasspathConfigurationName(), COSMICREACH_CLIENT_ONLY_NAMED.compile());
-			extendsFrom(project, clientOnlySourceSet.getRuntimeClasspathConfigurationName(), COSMICREACH_CLIENT_ONLY_NAMED.runtime());
+			extendsFrom(project, mainSourceSet.getCompileClasspathConfigurationName(), COSMICREACH_SERVER_NAMED.compile());
+			extendsFrom(project, mainSourceSet.getRuntimeClasspathConfigurationName(), COSMICREACH_SERVER_NAMED.runtime());
+			extendsFrom(project, clientOnlySourceSet.getCompileClasspathConfigurationName(), COSMICREACH_CLIENT_NAMED.compile());
+			extendsFrom(project, clientOnlySourceSet.getRuntimeClasspathConfigurationName(), COSMICREACH_CLIENT_NAMED.runtime());
 
 			// Client source set depends on common.
-			extendsFrom(project, COSMICREACH_CLIENT_ONLY_NAMED.runtime(), COSMICREACH_COMMON_NAMED.runtime());
-			extendsFrom(project, COSMICREACH_CLIENT_ONLY_NAMED.compile(), COSMICREACH_COMMON_NAMED.compile());
+			extendsFrom(project, COSMICREACH_CLIENT_NAMED.runtime(), COSMICREACH_SERVER_NAMED.runtime());
+			extendsFrom(project, COSMICREACH_CLIENT_NAMED.compile(), COSMICREACH_SERVER_NAMED.compile());
 
 			// Client annotation processor configuration extendsFrom "annotationProcessor"
 			extendsFrom(project, clientOnlySourceSet.getAnnotationProcessorConfigurationName(), JavaPlugin.ANNOTATION_PROCESSOR_CONFIGURATION_NAME);
