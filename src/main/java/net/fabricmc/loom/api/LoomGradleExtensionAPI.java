@@ -150,13 +150,6 @@ public interface LoomGradleExtensionAPI {
 	String getModVersion();
 
 	/**
-	 * When true loom will apply transitive access wideners from compile dependencies.
-	 *
-	 * @return the property controlling the transitive access wideners
-	 */
-	Property<Boolean> getEnableTransitiveAccessWideners();
-
-	/**
 	 * When true loom will apply mod provided javadoc from dependencies.
 	 *
 	 * @return the property controlling the mod provided javadoc

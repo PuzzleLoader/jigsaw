@@ -24,10 +24,7 @@
 
 package net.fabricmc.loom.extension;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
 import org.gradle.api.Action;
@@ -35,17 +32,13 @@ import org.gradle.api.NamedDomainObjectContainer;
 import org.gradle.api.NamedDomainObjectList;
 import org.gradle.api.Project;
 import org.gradle.api.UncheckedIOException;
-import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.file.ConfigurableFileCollection;
-import org.gradle.api.file.FileCollection;
 import org.gradle.api.file.RegularFileProperty;
-import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.ListProperty;
 import org.gradle.api.provider.Property;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.provider.SetProperty;
 import org.gradle.api.publish.maven.MavenPublication;
-import org.gradle.api.tasks.SourceSet;
 
 import net.fabricmc.loom.LoomGradleExtension;
 import net.fabricmc.loom.api.InterfaceInjectionExtensionAPI;
@@ -63,7 +56,7 @@ import net.fabricmc.loom.configuration.providers.cosmicreach.CosmicReachMetadata
 import net.fabricmc.loom.configuration.providers.cosmicreach.CosmicReachSourceSets;
 import net.fabricmc.loom.util.DeprecationHelper;
 import net.fabricmc.loom.util.MirrorUtil;
-import net.fabricmc.loom.util.fmj.FabricModJson;
+import net.fabricmc.loom.util.fmj.PuzzleModJson;
 import net.fabricmc.loom.util.fmj.FabricModJsonFactory;
 import net.fabricmc.loom.util.gradle.SourceSetHelper;
 
@@ -250,7 +243,7 @@ public abstract class LoomGradleExtensionApiImpl implements LoomGradleExtensionA
 	@Override
 	public String getModVersion() {
 		try {
-			final FabricModJson fabricModJson = FabricModJsonFactory.createFromSourceSetsNullable(SourceSetHelper.getMainSourceSet(getProject()));
+			final PuzzleModJson fabricModJson = FabricModJsonFactory.createFromSourceSetsNullable(SourceSetHelper.getMainSourceSet(getProject()));
 
 			if (fabricModJson == null) {
 				throw new RuntimeException("Could not find a fabric.mod.json file in the main sourceset");
@@ -260,11 +253,6 @@ public abstract class LoomGradleExtensionApiImpl implements LoomGradleExtensionA
 		} catch (IOException e) {
 			throw new UncheckedIOException("Failed to read mod version from main sourceset.", e);
 		}
-	}
-
-	@Override
-	public Property<Boolean> getEnableTransitiveAccessWideners() {
-		return transitiveAccessWideners;
 	}
 
 	@Override

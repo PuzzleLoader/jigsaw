@@ -31,14 +31,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.github.puzzle.access_manipulators.AccessManipulators;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.fabricmc.accesswidener.AccessWidener;
-import net.fabricmc.accesswidener.AccessWidenerClassVisitor;
 import net.fabricmc.loom.util.Constants;
 import net.fabricmc.loom.util.Pair;
 import net.fabricmc.loom.util.ZipUtils;
@@ -46,10 +45,7 @@ import net.fabricmc.loom.util.ZipUtils;
 final class AccessWidenerTransformer {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AccessWidenerTransformer.class);
 
-	private final AccessWidener accessWidener;
-
-	AccessWidenerTransformer(AccessWidener accessWidener) {
-		this.accessWidener = accessWidener;
+	AccessWidenerTransformer() {
 	}
 
 	/**
@@ -57,13 +53,13 @@ final class AccessWidenerTransformer {
 	 */
 	void apply(Path jarFile) {
 		try {
-			ZipUtils.transform(jarFile, getTransformers(accessWidener.getTargets()));
+			ZipUtils.transform(jarFile, getTransformers(AccessManipulators.affectedClasses));
 		} catch (IOException e) {
 			throw new UncheckedIOException("Failed to apply access wideners to %s".formatted(jarFile), e);
 		}
 	}
 
-	private List<Pair<String, ZipUtils.UnsafeUnaryOperator<byte[]>>> getTransformers(Set<String> classes) {
+	private List<Pair<String, ZipUtils.UnsafeUnaryOperator<byte[]>>> getTransformers(List<String> classes) {
 		return classes.stream()
 				.map(string -> new Pair<>(string.replaceAll("\\.", "/") + ".class", getTransformer(string)))
 				.collect(Collectors.toList());
@@ -71,14 +67,8 @@ final class AccessWidenerTransformer {
 
 	private ZipUtils.UnsafeUnaryOperator<byte[]> getTransformer(String className) {
 		return input -> {
-			ClassReader reader = new ClassReader(input);
-			ClassWriter writer = new ClassWriter(0);
-			ClassVisitor classVisitor = AccessWidenerClassVisitor.createClassVisitor(Constants.ASM_VERSION, writer, accessWidener);
-
-			LOGGER.debug("Applying access widener to " + className);
-
-			reader.accept(classVisitor, 0);
-			return writer.toByteArray();
+			LOGGER.debug("Applying access manipulator to " + className);
+			return AccessManipulators.transformClass(className, input);
 		};
 	}
 }

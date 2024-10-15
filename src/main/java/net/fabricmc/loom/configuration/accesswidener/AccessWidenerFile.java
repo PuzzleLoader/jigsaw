@@ -48,7 +48,7 @@ public record AccessWidenerFile(
 		byte[] modJsonBytes;
 
 		try {
-			modJsonBytes = ZipUtils.unpackNullable(modJarPath, "fabric.mod.json");
+			modJsonBytes = ZipUtils.unpackNullable(modJarPath, "puzzle.mod.json");
 		} catch (IOException e) {
 			throw new UncheckedIOException("Failed to read access-widener file from: " + modJarPath.toAbsolutePath(), e);
 		}

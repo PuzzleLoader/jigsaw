@@ -32,8 +32,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -47,8 +45,7 @@ import net.fabricmc.loom.LoomGradleExtension;
 import net.fabricmc.loom.api.RemapConfigurationSettings;
 import net.fabricmc.loom.api.processor.SpecContext;
 import net.fabricmc.loom.util.Constants;
-import net.fabricmc.loom.util.fmj.FabricModJson;
-import net.fabricmc.loom.util.fmj.FabricModJsonFactory;
+import net.fabricmc.loom.util.fmj.PuzzleModJson;
 import net.fabricmc.loom.util.fmj.FabricModJsonHelpers;
 import net.fabricmc.loom.util.gradle.GradleUtils;
 
@@ -57,16 +54,16 @@ import net.fabricmc.loom.util.gradle.GradleUtils;
  * @param localMods Mods found in the current project.
  * @param compileRuntimeMods Dependent mods found in both the compile and runtime classpath.
  */
-public record SpecContextImpl(List<FabricModJson> modDependencies, List<FabricModJson> localMods, List<FabricModJson> compileRuntimeMods) implements SpecContext {
+public record SpecContextImpl(List<PuzzleModJson> modDependencies, List<PuzzleModJson> localMods, List<PuzzleModJson> compileRuntimeMods) implements SpecContext {
 	public static SpecContextImpl create(Project project) {
-		final Map<String, List<FabricModJson>> fmjCache = new HashMap<>();
+		final Map<String, List<PuzzleModJson>> fmjCache = new HashMap<>();
 		return new SpecContextImpl(getDependentMods(project, fmjCache), FabricModJsonHelpers.getModsInProject(project), getCompileRuntimeMods(project, fmjCache));
 	}
 
 	// Reruns a list of mods found on both the compile and/or runtime classpaths
-	private static List<FabricModJson> getDependentMods(Project project, Map<String, List<FabricModJson>> fmjCache) {
+	private static List<PuzzleModJson> getDependentMods(Project project, Map<String, List<PuzzleModJson>> fmjCache) {
 		final LoomGradleExtension extension = LoomGradleExtension.get(project);
-		var mods = new ArrayList<FabricModJson>();
+		var mods = new ArrayList<PuzzleModJson>();
 
 		if (!GradleUtils.getBooleanProperty(project, Constants.Properties.DISABLE_PROJECT_DEPENDENT_MODS)) {
 			// Add all the dependent projects
@@ -89,8 +86,8 @@ public record SpecContextImpl(List<FabricModJson> modDependencies, List<FabricMo
 	}
 
 	// Returns a list of mods that are on both to compile and runtime classpath
-	private static List<FabricModJson> getCompileRuntimeMods(Project project, Map<String, List<FabricModJson>> fmjCache) {
-		ArrayList<FabricModJson> mods = new ArrayList<>();
+	private static List<PuzzleModJson> getCompileRuntimeMods(Project project, Map<String, List<PuzzleModJson>> fmjCache) {
+		ArrayList<PuzzleModJson> mods = new ArrayList<>();
 
 		for (Project dependentProject : getCompileRuntimeProjectDependencies(project).toList()) {
 			mods.addAll(fmjCache.computeIfAbsent(dependentProject.getPath(), $ -> {
@@ -131,12 +128,12 @@ public record SpecContextImpl(List<FabricModJson> modDependencies, List<FabricMo
 	}
 
 	// Sort to ensure stable caching
-	private static List<FabricModJson> sorted(List<FabricModJson> mods) {
-		return mods.stream().sorted(Comparator.comparing(FabricModJson::getId)).toList();
+	private static List<PuzzleModJson> sorted(List<PuzzleModJson> mods) {
+		return mods.stream().sorted(Comparator.comparing(PuzzleModJson::getId)).toList();
 	}
 
 	@Override
-	public List<FabricModJson> modDependenciesCompileRuntime() {
+	public List<PuzzleModJson> modDependenciesCompileRuntime() {
 		return compileRuntimeMods;
 	}
 }

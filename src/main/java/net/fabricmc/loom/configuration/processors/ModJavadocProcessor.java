@@ -48,7 +48,7 @@ import net.fabricmc.loom.api.processor.ProcessorContext;
 import net.fabricmc.loom.api.processor.SpecContext;
 import net.fabricmc.loom.util.Checksum;
 import net.fabricmc.loom.util.Constants;
-import net.fabricmc.loom.util.fmj.FabricModJson;
+import net.fabricmc.loom.util.fmj.PuzzleModJson;
 import net.fabricmc.mappingio.MappingReader;
 import net.fabricmc.mappingio.tree.MappingTree;
 import net.fabricmc.mappingio.tree.MemoryMappingTree;
@@ -72,7 +72,7 @@ public abstract class ModJavadocProcessor implements MinecraftJarProcessor<ModJa
 	public @Nullable ModJavadocProcessor.Spec buildSpec(SpecContext context) {
 		List<ModJavadoc> javadocs = new ArrayList<>();
 
-		for (FabricModJson fabricModJson : context.allMods()) {
+		for (PuzzleModJson fabricModJson : context.allMods()) {
 			ModJavadoc javadoc = ModJavadoc.create(fabricModJson);
 
 			if (javadoc != null) {
@@ -98,7 +98,7 @@ public abstract class ModJavadocProcessor implements MinecraftJarProcessor<ModJa
 
 	public record ModJavadoc(String modId, MemoryMappingTree mappingTree, String mappingsHash) {
 		@Nullable
-		public static ModJavadoc create(FabricModJson fabricModJson) {
+		public static ModJavadoc create(PuzzleModJson fabricModJson) {
 			final String modId = fabricModJson.getId();
 			final JsonElement customElement = fabricModJson.getCustom(Constants.CustomModJsonKeys.PROVIDED_JAVADOC);
 

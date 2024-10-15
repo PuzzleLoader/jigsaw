@@ -35,11 +35,11 @@ import com.google.gson.JsonObject;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 
-public abstract sealed class FabricModJson permits FabricModJsonV0, FabricModJsonV1, FabricModJsonV2, FabricModJson.Mockable {
+public abstract sealed class PuzzleModJson permits PuzzleModJsonV0, PuzzleModJson.Mockable {
 	protected final JsonObject jsonObject;
 	private final FabricModJsonSource source;
 
-	protected FabricModJson(JsonObject jsonObject, FabricModJsonSource source) {
+	protected PuzzleModJson(JsonObject jsonObject, FabricModJsonSource source) {
 		this.jsonObject = Objects.requireNonNull(jsonObject);
 		this.source = Objects.requireNonNull(source);
 	}
@@ -76,7 +76,7 @@ public abstract sealed class FabricModJson permits FabricModJsonV0, FabricModJso
 	}
 
 	@VisibleForTesting
-	public abstract non-sealed class Mockable extends FabricModJson {
+	public abstract non-sealed class Mockable extends PuzzleModJson {
 		private Mockable() {
 			super(null, null);
 			throw new AssertionError();

@@ -128,7 +128,7 @@ public abstract class ProcessedNamedCosmicReachProvider<M extends CosmicReachPro
 	@Override
 	protected String getName(CosmicReachJar.Type type) {
 		// Hash the cache value so that we don't have to process the same JAR multiple times for many projects
-		return "minecraft-%s-%s".formatted(type.toString(), jarProcessorManager.getJarHash());
+		return "processed-%s-%s".formatted(type.toString(), jarProcessorManager.getJarHash());
 	}
 
 	@Override

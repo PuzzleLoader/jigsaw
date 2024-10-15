@@ -74,13 +74,6 @@ public abstract class LoomTasks implements Runnable {
 			task.setGroup(Constants.TaskGroup.PUZZLE);
 		});
 
-		TaskProvider<ValidateAccessWidenerTask> validateAccessWidener = getTasks().register("validateAccessWidener", ValidateAccessWidenerTask.class, t -> {
-			t.setDescription("Validate all the rules in the access widener against the Minecraft jar");
-			t.setGroup("verification");
-		});
-
-		getTasks().named("check").configure(task -> task.dependsOn(validateAccessWidener));
-
 		registerIDETasks();
 		registerRunTasks();
 

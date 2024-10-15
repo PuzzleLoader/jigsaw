@@ -24,11 +24,12 @@
 
 package net.fabricmc.loom.configuration.accesswidener;
 
-import net.fabricmc.accesswidener.AccessWidener;
+import com.github.puzzle.access_manipulators.AccessManipulators;
+
 import net.fabricmc.loom.api.processor.MinecraftJarProcessor;
 import net.fabricmc.loom.api.processor.ProcessorContext;
 import net.fabricmc.loom.api.processor.SpecContext;
-import net.fabricmc.loom.util.fmj.FabricModJson;
+import net.fabricmc.loom.util.fmj.PuzzleModJson;
 import net.fabricmc.loom.util.fmj.ModEnvironment;
 
 import org.gradle.api.file.RegularFileProperty;
@@ -46,19 +47,16 @@ import java.util.Comparator;
 import java.util.List;
 
 public class AccessManipulatorJarProcessor implements MinecraftJarProcessor<AccessManipulatorJarProcessor.Spec> {
-	private final String name;
-	private final boolean includeTransitive;
 	private final RegularFileProperty localAccessManipulatorProperty;
 
 	@Inject
-	public AccessManipulatorJarProcessor(String name, boolean includeTransitive, RegularFileProperty localAccessWidenerProperty) {
-		this.name = name;
-		this.includeTransitive = includeTransitive;
-		this.localAccessManipulatorProperty = localAccessWidenerProperty;
+	public AccessManipulatorJarProcessor(RegularFileProperty localAccessManipulatorProperty) {
+		this.localAccessManipulatorProperty = localAccessManipulatorProperty;
 	}
 
 	@Override
 	public @Nullable AccessManipulatorJarProcessor.Spec buildSpec(SpecContext context) {
+
 		List<AccessWidenerEntry> accessWideners = new ArrayList<>();
 
 		if (localAccessManipulatorProperty.isPresent()) {
@@ -80,10 +78,8 @@ public class AccessManipulatorJarProcessor implements MinecraftJarProcessor<Acce
 
 		 */
 
-		if (includeTransitive) {
-			for (FabricModJson fabricModJson : context.modDependencies()) {
-				accessWideners.addAll(ModAccessWidenerEntry.readAll(fabricModJson, true));
-			}
+		for (PuzzleModJson fabricModJson : context.modDependencies()) {
+			accessWideners.addAll(ModAccessWidenerEntry.readAll(fabricModJson, true));
 		}
 
 		if (accessWideners.isEmpty()) {
@@ -95,7 +91,7 @@ public class AccessManipulatorJarProcessor implements MinecraftJarProcessor<Acce
 
 	@Override
 	public String getName() {
-		return name;
+		return "Manipulator";
 	}
 
 	public record Spec(List<AccessWidenerEntry> accessWideners) implements MinecraftJarProcessor.Spec {
@@ -127,14 +123,11 @@ public class AccessManipulatorJarProcessor implements MinecraftJarProcessor<Acce
 	@Override
 	public void processJar(Path jar, AccessManipulatorJarProcessor.Spec spec, ProcessorContext context) throws IOException {
 		final List<AccessWidenerEntry> accessWideners = spec.accessWidenersForContext(context);
-
-		final var accessWidener = new AccessWidener();
-
-		for (AccessWidenerEntry widener : accessWideners) {
-			widener.read(accessWidener);
+		for (AccessWidenerEntry entry : accessWideners) {
+			entry.read();
 		}
 
-		AccessWidenerTransformer transformer = new AccessWidenerTransformer(accessWidener);
+		AccessWidenerTransformer transformer = new AccessWidenerTransformer();
 		transformer.apply(jar);
 	}
 

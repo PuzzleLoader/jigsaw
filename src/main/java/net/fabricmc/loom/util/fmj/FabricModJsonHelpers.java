@@ -38,7 +38,7 @@ import net.fabricmc.loom.util.gradle.SourceSetHelper;
 
 public class FabricModJsonHelpers {
 	// Returns a list of Mods found in the provided project's main or client sourcesets
-	public static List<FabricModJson> getModsInProject(Project project) {
+	public static List<PuzzleModJson> getModsInProject(Project project) {
 		final LoomGradleExtension extension = LoomGradleExtension.get(project);
 		var sourceSets = new ArrayList<SourceSet>();
 		sourceSets.add(SourceSetHelper.getMainSourceSet(project));
@@ -48,7 +48,7 @@ public class FabricModJsonHelpers {
 		}
 
 		try {
-			final FabricModJson fabricModJson = FabricModJsonFactory.createFromSourceSetsNullable(sourceSets.toArray(SourceSet[]::new));
+			final PuzzleModJson fabricModJson = FabricModJsonFactory.createFromSourceSetsNullable(sourceSets.toArray(SourceSet[]::new));
 
 			if (fabricModJson != null) {
 				return List.of(fabricModJson);

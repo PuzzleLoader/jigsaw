@@ -27,17 +27,17 @@ package net.fabricmc.loom.api.processor;
 import java.util.List;
 import java.util.stream.Stream;
 
-import net.fabricmc.loom.util.fmj.FabricModJson;
+import net.fabricmc.loom.util.fmj.PuzzleModJson;
 
 public interface SpecContext {
-	List<FabricModJson> modDependencies();
+	List<PuzzleModJson> modDependencies();
 
-	List<FabricModJson> localMods();
+	List<PuzzleModJson> localMods();
 
 	// Returns mods that are both on the compile and runtime classpath
-	List<FabricModJson> modDependenciesCompileRuntime();
+	List<PuzzleModJson> modDependenciesCompileRuntime();
 
-	default List<FabricModJson> allMods() {
+	default List<PuzzleModJson> allMods() {
 		return Stream.concat(modDependencies().stream(), localMods().stream()).toList();
 	}
 }

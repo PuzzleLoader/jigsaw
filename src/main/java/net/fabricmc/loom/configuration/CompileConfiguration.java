@@ -37,6 +37,7 @@ import java.util.function.Consumer;
 
 import javax.inject.Inject;
 
+import net.fabricmc.loom.configuration.accesswidener.AccessManipulatorJarProcessor;
 import net.fabricmc.loom.configuration.providers.cosmicreach.FinalizedCosmicReachProvider;
 
 import org.gradle.api.GradleException;
@@ -56,7 +57,6 @@ import net.fabricmc.loom.build.mixin.GroovyApInvoker;
 import net.fabricmc.loom.build.mixin.JavaApInvoker;
 import net.fabricmc.loom.build.mixin.KaptApInvoker;
 import net.fabricmc.loom.build.mixin.ScalaApInvoker;
-import net.fabricmc.loom.configuration.accesswidener.AccessWidenerJarProcessor;
 import net.fabricmc.loom.configuration.processors.CosmicReachJarProcessorManager;
 import net.fabricmc.loom.configuration.processors.ModJavadocProcessor;
 import net.fabricmc.loom.configuration.providers.cosmicreach.CosmicReachMetadataProvider;
@@ -185,8 +185,7 @@ public abstract class CompileConfiguration implements Runnable {
 	private void registerGameProcessors(ConfigContext configContext) {
 		final LoomGradleExtension extension = configContext.extension();
 
-		final boolean enableTransitiveAccessWideners = extension.getEnableTransitiveAccessWideners().get();
-		extension.addMinecraftJarProcessor(AccessWidenerJarProcessor.class, "fabric-loom:access-widener", enableTransitiveAccessWideners, extension.getAccessWidenerPath());
+		extension.addMinecraftJarProcessor(AccessManipulatorJarProcessor.class, extension.getAccessWidenerPath());
 
 		if (true) {
 			extension.addMinecraftJarProcessor(ModJavadocProcessor.class, "fabric-loom:mod-javadoc");

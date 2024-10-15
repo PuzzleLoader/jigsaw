@@ -151,7 +151,6 @@ dependencies {
 
 	// tinyfile management
 	implementation libs.fabric.tiny.remapper
-	implementation libs.fabric.access.widener
 	implementation libs.fabric.mapping.io
 	implementation (libs.fabric.lorenz.tiny) {
 		transitive = false

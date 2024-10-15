@@ -27,6 +27,7 @@ package net.fabricmc.loom.util.fmj;
 import static net.fabricmc.loom.util.fmj.FabricModJsonUtils.readString;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -38,8 +39,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import org.jetbrains.annotations.Nullable;
 
-public final class FabricModJsonV1 extends FabricModJson {
-	FabricModJsonV1(JsonObject jsonObject, FabricModJsonSource source) {
+public final class PuzzleModJsonV0 extends PuzzleModJson {
+	PuzzleModJsonV0(JsonObject jsonObject, FabricModJsonSource source) {
 		super(jsonObject, source);
 	}
 
@@ -77,7 +78,7 @@ public final class FabricModJsonV1 extends FabricModJson {
 		}
 
 		return StreamSupport.stream(mixinArray.spliterator(), false)
-				.map(FabricModJsonV1::readMixinElement)
+				.map(PuzzleModJsonV0::readMixinElement)
 				.collect(Collectors.toList());
 	}
 
@@ -93,10 +94,16 @@ public final class FabricModJsonV1 extends FabricModJson {
 
 	@Override
 	public Map<String, ModEnvironment> getClassTweakers() {
-		if (!jsonObject.has("accessWidener")) {
+		if (!jsonObject.has("accessWidener") || !jsonObject.has("accessTransformer") || !jsonObject.has("accessManipulator")) {
 			return Collections.emptyMap();
 		}
 
-		return Map.of(readString(jsonObject, "accessWidener"), ModEnvironment.UNIVERSAL);
+		Map<String, ModEnvironment> environmentMap = new HashMap<>();
+
+		if (jsonObject.has("accessWidener")) environmentMap.put(readString(jsonObject, "accessWidener"), ModEnvironment.UNIVERSAL);
+		if (jsonObject.has("accessTransformer")) environmentMap.put(readString(jsonObject, "accessTransformer"), ModEnvironment.UNIVERSAL);
+		if (jsonObject.has("accessManipulator")) environmentMap.put(readString(jsonObject, "accessManipulator"), ModEnvironment.UNIVERSAL);
+
+		return environmentMap;
 	}
 }

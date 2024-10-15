@@ -57,7 +57,7 @@ public final class FabricModJsonFactory {
 	}
 
 	@VisibleForTesting
-	public static FabricModJson create(JsonObject jsonObject, FabricModJsonSource source) {
+	public static PuzzleModJson create(JsonObject jsonObject, FabricModJsonSource source) {
 		int schemaVersion = 0;
 
 		if (jsonObject.has("schemaVersion")) {
@@ -66,14 +66,12 @@ public final class FabricModJsonFactory {
 		}
 
 		return switch (schemaVersion) {
-		case 0 -> new FabricModJsonV0(jsonObject, source);
-		case 1 -> new FabricModJsonV1(jsonObject, source);
-		case 2 -> new FabricModJsonV2(jsonObject, source);
-		default -> throw new UnsupportedOperationException(String.format("This version of fabric-loom doesn't support the newer fabric.mod.json schema version of (%s) Please update fabric-loom to be able to read this.", schemaVersion));
+		case 0 -> new PuzzleModJsonV0(jsonObject, source);
+		default -> throw new UnsupportedOperationException(String.format("This version of jigsaw doesn't support the newer puzzle.mod.json schema version of (%s) Please update jigsaw to be able to read this.", schemaVersion));
 		};
 	}
 
-	public static FabricModJson createFromZip(Path zipPath) {
+	public static PuzzleModJson createFromZip(Path zipPath) {
 		try {
 			return create(ZipUtils.unpackGson(zipPath, FABRIC_MOD_JSON, JsonObject.class), new FabricModJsonSource.ZipSource(zipPath));
 		} catch (IOException e) {
@@ -84,7 +82,7 @@ public final class FabricModJsonFactory {
 	}
 
 	@Nullable
-	public static FabricModJson createFromZipNullable(Path zipPath) {
+	public static PuzzleModJson createFromZipNullable(Path zipPath) {
 		JsonObject jsonObject;
 
 		try {
@@ -102,12 +100,12 @@ public final class FabricModJsonFactory {
 		return create(jsonObject, new FabricModJsonSource.ZipSource(zipPath));
 	}
 
-	public static Optional<FabricModJson> createFromZipOptional(Path zipPath) {
+	public static Optional<PuzzleModJson> createFromZipOptional(Path zipPath) {
 		return Optional.ofNullable(createFromZipNullable(zipPath));
 	}
 
 	@Nullable
-	public static FabricModJson createFromSourceSetsNullable(SourceSet... sourceSets) throws IOException {
+	public static PuzzleModJson createFromSourceSetsNullable(SourceSet... sourceSets) throws IOException {
 		final File file = SourceSetHelper.findFirstFileInResource(FABRIC_MOD_JSON, sourceSets);
 
 		if (file == null) {

@@ -29,10 +29,9 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import com.github.puzzle.access_manipulators.AccessManipulators;
 import org.jetbrains.annotations.Nullable;
 
-import net.fabricmc.accesswidener.AccessWidenerReader;
-import net.fabricmc.accesswidener.AccessWidenerVisitor;
 import net.fabricmc.loom.util.Checksum;
 import net.fabricmc.loom.util.LazyCloseable;
 import net.fabricmc.loom.util.fmj.ModEnvironment;
@@ -48,9 +47,8 @@ public record LocalAccessWidenerEntry(Path path, String hash) implements AccessW
 	}
 
 	@Override
-	public void read(AccessWidenerVisitor visitor) throws IOException {
-		var reader = new AccessWidenerReader(visitor);
-		reader.read(Files.readAllBytes(path));
+	public void read(){
+		AccessManipulators.registerModifierFile(path().toAbsolutePath().toString());
 	}
 
 	@Override
