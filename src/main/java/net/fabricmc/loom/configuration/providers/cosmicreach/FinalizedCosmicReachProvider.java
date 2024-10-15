@@ -22,6 +22,7 @@ import net.fabricmc.loom.extension.LoomFiles;
 import net.fabricmc.tinyremapper.OutputConsumerPath;
 
 import org.gradle.api.Project;
+import org.gradle.util.internal.MavenUtil;
 
 public abstract class FinalizedCosmicReachProvider<M extends CosmicReachProvider> implements MappedMinecraftProvider {
 
@@ -197,17 +198,20 @@ public abstract class FinalizedCosmicReachProvider<M extends CosmicReachProvider
 			try {
 //				outputConsumer.addNonClassFiles(remappedJar.inputJar());
 
-				FileInputStream stream0 = new FileInputStream(remappedJar.inputJar.toFile());
 				if (!remappedJar.outputJar().toFile().exists()) {
 					try {
-						remappedJar.outputJar().toFile().createNewFile();
-						remappedJar.outputJar().toFile().getParentFile().mkdirs();
+//						remappedJar.outputJar().toFile().createNewFile();
+//						remappedJar.outputJar().toFile().getParentFile().mkdirs();
 					} catch (Exception ignore) {}
 				}
-				FileOutputStream stream = new FileOutputStream(remappedJar.outputJar.toFile());
-				stream.write(stream0.readAllBytes());
-				stream.close();
-				stream0.close();
+
+				final LocalMavenHelper mavenHelper = getMavenHelper(remappedJar.outputJar().getType());
+				final Path outputPath = mavenHelper.copyToMaven(remappedJar.inputJar, null);
+//				FileInputStream stream0 = new FileInputStream(remappedJar.inputJar.toFile());
+//				FileOutputStream stream = new FileOutputStream(remappedJar.outputJar.toFile());
+//				stream.write(stream0.readAllBytes());
+//				stream.close();
+//				stream0.close();
 
 			} catch (Exception e) {
 				e.printStackTrace();

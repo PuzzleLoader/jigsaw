@@ -99,7 +99,6 @@ public abstract sealed class CosmicReachSourceSets permits CosmicReachSourceSets
 
 		@Override
 		public void applyDependencies(BiConsumer<String, CosmicReachJar.Type> consumer, List<CosmicReachJar.Type> targets) {
-			System.out.println("69420");
 			for (CosmicReachJar.Type target : targets) {
 				consumer.accept(COSMICREACH_NAMED.compile(), target);
 				consumer.accept(COSMICREACH_NAMED.runtime(), target);

@@ -106,7 +106,7 @@ public abstract class LoomGradleExtensionApiImpl implements LoomGradleExtensionA
 		this.log4jConfigs = project.files(directories.getDefaultLog4jConfigFile());
 		this.accessWidener = project.getObjects().fileProperty();
 		this.versionsManifests = new ManifestLocations();
-		this.versionsManifests.add("mojang", MirrorUtil.getVersionManifests(project), -2);
+		this.versionsManifests.add("cosmic_reach", MirrorUtil.getVersionManifests(project), -2);
 //		this.versionsManifests.add("fabric_experimental", MirrorUtil.getExperimentalVersions(project), -1);
 		this.customMetadata = project.getObjects().property(String.class);
 		this.knownIndyBsms = project.getObjects().setProperty(String.class).convention(Set.of(

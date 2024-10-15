@@ -69,6 +69,22 @@ public class LoomRepositoryPlugin implements Plugin<PluginAware> {
 			repo.setUrl(MirrorUtil.getFabricRepository(target));
 		});
 
+		MavenArtifactRepository mojangRepo0 = repositories.maven(repo -> {
+			repo.setName("Mojang");
+			repo.setUrl(MirrorUtil.getLibrariesBase(target));
+
+			// Don't use the gradle module metadata. It has unintended side effects.
+			repo.metadataSources(sources -> {
+				sources.mavenPom();
+				sources.artifact();
+				sources.ignoreGradleMetadataRedirection();
+			});
+
+			// Fallback to maven central for artifacts such as sources or javadocs that are not mirrored on Mojang's repo.
+			// See: https://github.com/FabricMC/fabric-loom/issues/1032
+			repo.artifactUrls(ArtifactRepositoryContainer.MAVEN_CENTRAL_URL);
+		});
+
 		IvyArtifactRepository mojangRepo = repositories.ivy(repo -> { // The CR repo
 			repo.setName("CosmicArchive");
 			repo.setUrl("https://github.com/CRModders/CosmicArchive/raw/main/versions/pre-alpha");
@@ -78,7 +94,10 @@ public class LoomRepositoryPlugin implements Plugin<PluginAware> {
 				pattern.artifact("/[revision]/[classifier]/Cosmic Reach-Server-[revision].jar");
 			});
 
-			repo.metadataSources(IvyArtifactRepository.MetadataSources::artifact);
+			repo.metadataSources(sources -> {
+				sources.artifact();
+				sources.ignoreGradleMetadataRedirection();
+			});
 
 			repo.content(content -> {
 				content.includeModule("finalforeach", "cosmicreach");
@@ -89,6 +108,7 @@ public class LoomRepositoryPlugin implements Plugin<PluginAware> {
 		// See: https://github.com/FabricMC/fabric-loom/issues/621
 		ArtifactRepository mavenCentral = repositories.findByName(ArtifactRepositoryContainer.DEFAULT_MAVEN_CENTRAL_REPO_NAME);
 
+		repositories.add(mojangRepo0);
 		if (mavenCentral != null) {
 			repositories.remove(mojangRepo);
 			repositories.add(repositories.indexOf(mavenCentral), mojangRepo);
