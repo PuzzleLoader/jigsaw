@@ -76,8 +76,8 @@ public abstract class AbstractRunTask extends JavaExec {
 	protected abstract ConfigurableFileCollection getInternalClasspath();
 
 	// Prevent Gradle from running two run tasks in parallel
-	@ServiceReference(SyncTaskBuildService.NAME)
-	abstract Property<SyncTaskBuildService> getSyncTask();
+//	@ServiceReference(SyncTaskBuildService.NAME)
+//	abstract Property<SyncTaskBuildService> getSyncTask();
 
 	public AbstractRunTask(Function<Project, RunConfig> configProvider) {
 		super();

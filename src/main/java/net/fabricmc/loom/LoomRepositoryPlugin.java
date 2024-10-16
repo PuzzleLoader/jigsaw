@@ -122,23 +122,7 @@ public class LoomRepositoryPlugin implements Plugin<PluginAware> {
 			repo.setUrl(MirrorUtil.getFabricRepository(target));
 		});
 
-		MavenArtifactRepository mojangRepo0 = repositories.maven(repo -> {
-			repo.setName("Mojang");
-			repo.setUrl(MirrorUtil.getLibrariesBase(target));
-
-			// Don't use the gradle module metadata. It has unintended side effects.
-			repo.metadataSources(sources -> {
-				sources.mavenPom();
-				sources.artifact();
-				sources.ignoreGradleMetadataRedirection();
-			});
-
-			// Fallback to maven central for artifacts such as sources or javadocs that are not mirrored on Mojang's repo.
-			// See: https://github.com/FabricMC/fabric-loom/issues/1032
-			repo.artifactUrls(ArtifactRepositoryContainer.MAVEN_CENTRAL_URL);
-		});
-
-		IvyArtifactRepository mojangRepo = repositories.ivy(repo -> { // The CR repo
+		IvyArtifactRepository cosmicArchiveRepo = repositories.ivy(repo -> { // The CR repo
 			repo.setName("CosmicArchive");
 			repo.setUrl("https://github.com/CRModders/CosmicArchive/raw/main/versions/pre-alpha");
 
@@ -157,14 +141,37 @@ public class LoomRepositoryPlugin implements Plugin<PluginAware> {
 			});
 		});
 
+		IvyArtifactRepository puzzleArchiveRepo = repositories.ivy(repo -> { // The CR repo
+			repo.setName("PuzzleArchive");
+			repo.setUrl("https://github.com/PuzzleLoader/CRPuzzleArchive/raw/main/versions/pre-alpha");
+
+			repo.patternLayout(pattern -> {
+				pattern.artifact("/[revision]/[classifier]/Cosmic Reach-[revision].jar");
+				pattern.artifact("/[revision]/[classifier]/Cosmic Reach-Server-[revision].jar");
+			});
+
+			repo.metadataSources(sources -> {
+				sources.artifact();
+				sources.ignoreGradleMetadataRedirection();
+			});
+
+
+			repo.content(content -> {
+				content.includeModule("finalforeach", "cosmicreach");
+			});
+		});
+
 		// If a mavenCentral repo is already defined, remove the mojang repo and add it back before the mavenCentral repo so that it will be checked first.
 		// See: https://github.com/FabricMC/fabric-loom/issues/621
 		ArtifactRepository mavenCentral = repositories.findByName(ArtifactRepositoryContainer.DEFAULT_MAVEN_CENTRAL_REPO_NAME);
 
-		repositories.add(mojangRepo0);
+		repositories.add(cosmicArchiveRepo);
+		repositories.add(puzzleArchiveRepo);
 		if (mavenCentral != null) {
-			repositories.remove(mojangRepo);
-			repositories.add(repositories.indexOf(mavenCentral), mojangRepo);
+			repositories.remove(cosmicArchiveRepo);
+			repositories.remove(puzzleArchiveRepo);
+			repositories.add(repositories.indexOf(mavenCentral), cosmicArchiveRepo);
+			repositories.add(repositories.indexOf(cosmicArchiveRepo), puzzleArchiveRepo);
 		}
 
 		repositories.mavenCentral();
@@ -177,13 +184,13 @@ public class LoomRepositoryPlugin implements Plugin<PluginAware> {
 		});
 
 		repositories.maven(repo -> {
-			repo.setName("LoomGlobalCosmicReach");
-			repo.setUrl(files.getGlobalCosmicReachRepo());
+			repo.setName("LoomLocalCosmicReach");
+			repo.setUrl(files.getLocalCosmicReachRepo());
 		});
 
 		repositories.maven(repo -> {
-			repo.setName("LoomLocalCosmicReach");
-			repo.setUrl(files.getLocalCosmicReachRepo());
+			repo.setName("LoomGlobalCosmicReach");
+			repo.setUrl(files.getGlobalCosmicReachRepo());
 		});
 	}
 

@@ -48,7 +48,11 @@ public record LocalAccessWidenerEntry(Path path, String hash) implements AccessW
 
 	@Override
 	public void read(){
-		AccessManipulators.registerModifierFile(path().toAbsolutePath().toString());
+		try {
+			AccessManipulators.registerModifierFile(path().toAbsolutePath().toString());
+		} catch (Exception ignore) {
+			ignore.printStackTrace();
+		}
 	}
 
 	@Override

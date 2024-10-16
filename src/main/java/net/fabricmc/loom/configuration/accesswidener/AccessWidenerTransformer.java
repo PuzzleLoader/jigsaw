@@ -61,14 +61,15 @@ final class AccessWidenerTransformer {
 
 	private List<Pair<String, ZipUtils.UnsafeUnaryOperator<byte[]>>> getTransformers(List<String> classes) {
 		return classes.stream()
-				.map(string -> new Pair<>(string.replaceAll("\\.", "/") + ".class", getTransformer(string)))
+				.map(string -> new Pair<>(string, getTransformer(string)))
 				.collect(Collectors.toList());
 	}
 
 	private ZipUtils.UnsafeUnaryOperator<byte[]> getTransformer(String className) {
 		return input -> {
-			LOGGER.debug("Applying access manipulator to " + className);
-			return AccessManipulators.transformClass(className, input);
+			System.out.println("Applying access manipulator to " + className);
+//			LOGGER.debug("Applying access manipulator to " + className);
+			return AccessManipulators.transformClass(className.replaceAll("\\.class", ""), input);
 		};
 	}
 }

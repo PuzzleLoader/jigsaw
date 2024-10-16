@@ -162,7 +162,6 @@ public abstract class CompileConfiguration implements Runnable {
 		CosmicReachJarProcessorManager cosmicReachJarProcessorManager = CosmicReachJarProcessorManager.create(getProject());
 
 		if (cosmicReachJarProcessorManager != null) {
-			System.out.println(cosmicReachJarProcessorManager + " asdfasdfasfdd");
 			finalizedCosmicReachProvider = jarConfiguration.createProcessedNamedCosmicReachProvider(finalizedCosmicReachProvider, cosmicReachJarProcessorManager);
 		}
 

@@ -125,6 +125,14 @@ public abstract class ProcessedNamedCosmicReachProvider<M extends CosmicReachPro
 		}
 	}
 
+	protected String getDependencyNotation(CosmicReachJar.Type type) {
+		return "finalforeach:cosmicreach-%s:%s:%s".formatted(getName(type), getVersion(), getName(type));
+	}
+
+	public LocalMavenHelper getMavenHelper(CosmicReachJar.Type type) {
+		return new LocalMavenHelper("finalforeach", "cosmicreach-"+getName(type), getVersion(), getName(type), getMavenScope().getRoot(extension));
+	}
+
 	@Override
 	protected String getName(CosmicReachJar.Type type) {
 		// Hash the cache value so that we don't have to process the same JAR multiple times for many projects
