@@ -51,6 +51,14 @@ public class MirrorUtil {
 		return Constants.VERSION_MANIFESTS;
 	}
 
+	public static String getVersionManifests2(ExtensionAware aware) {
+		if (aware.getExtensions().getExtraProperties().has("loom_version_manifests")) {
+			return String.valueOf(aware.getExtensions().getExtraProperties().get("loom_version_manifests"));
+		}
+
+		return Constants.VERSION_MANIFESTS2;
+	}
+
 	public static String getFabricRepository(ExtensionAware aware) {
 		if (aware.getExtensions().getExtraProperties().has("loom_fabric_repository")) {
 			return String.valueOf(aware.getExtensions().getExtraProperties().get("loom_fabric_repository"));
