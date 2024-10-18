@@ -26,12 +26,14 @@ package net.fabricmc.loom.task;
 
 import javax.inject.Inject;
 
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar;
 import com.google.common.base.Preconditions;
 
 import net.fabricmc.loom.configuration.providers.cosmicreach.VersionsManifest;
 
 import org.gradle.api.Project;
 import org.gradle.api.Task;
+import org.gradle.api.plugins.internal.JavaPluginHelper;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.TaskContainer;
 import org.gradle.api.tasks.TaskProvider;
@@ -43,6 +45,10 @@ import net.fabricmc.loom.task.launch.GenerateDLIConfigTask;
 import net.fabricmc.loom.task.launch.GenerateLog4jConfigTask;
 import net.fabricmc.loom.util.Constants;
 import net.fabricmc.loom.util.gradle.GradleUtils;
+
+import org.gradle.api.tasks.bundling.Jar;
+
+import java.util.Collections;
 
 public abstract class LoomTasks implements Runnable {
 	@Inject
@@ -72,6 +78,44 @@ public abstract class LoomTasks implements Runnable {
 
 			task.setDescription("Setup the required files to launch Minecraft");
 			task.setGroup(Constants.TaskGroup.PUZZLE);
+		});
+
+		getTasks().register("buildSlimJar", Jar.class, t -> {
+			t.setGroup(Constants.TaskGroup.PUZZLE);
+			t.dependsOn(getProject().getTasks().getByName("compileJava"));
+			t.dependsOn(getProject().getTasks().getByName("processResources"));
+			t.from(getProject().getTasks().getByName("processResources").getOutputs().getFiles());
+			t.from(JavaPluginHelper.getJavaComponent(getProject()).getMainFeature().getSourceSet().getOutput().getClassesDirs().getFiles());
+
+			t.getArchiveVersion().set(t.getArchiveVersion().get()+"-slim");
+			t.setDescription("Builds a jar with no bundled dependencies");
+		});
+
+		getTasks().register("buildBundleJar", ShadowJar.class, t -> {
+			t.setGroup(Constants.TaskGroup.PUZZLE);
+			t.dependsOn(getProject().getTasks().getByName("compileJava"));
+			t.dependsOn(getProject().getTasks().getByName("processResources"));
+			t.setConfigurations(Collections.singletonList(getProject().getConfigurations().getByName("bundle")));
+			t.from(getProject().getTasks().getByName("processResources").getOutputs().getFiles());
+			t.from(JavaPluginHelper.getJavaComponent(getProject()).getMainFeature().getSourceSet().getOutput().getClassesDirs().getFiles());
+
+			t.getArchiveVersion().set(t.getArchiveVersion().get()+"-bundle");
+			t.setDescription("Builds a jar with all of the dependencies bundled");
+		});
+
+		getTasks().register("buildSourcesJar", Jar.class, t -> {
+			t.setGroup(Constants.TaskGroup.PUZZLE);
+			t.from(JavaPluginHelper.getJavaComponent(getProject()).getMainFeature().getSourceSet().getAllJava());
+
+			t.getArchiveVersion().set(t.getArchiveVersion().get()+"-sources");
+			t.setDescription("Builds a jar with no bundled dependencies");
+		});
+
+		getTasks().register("buildAllJars", t -> {
+			t.setGroup(Constants.TaskGroup.PUZZLE);
+			t.dependsOn("buildSlimJar");
+			t.dependsOn("buildBundleJar");
+			t.dependsOn("buildSourcesJar");
 		});
 
 		registerIDETasks();
